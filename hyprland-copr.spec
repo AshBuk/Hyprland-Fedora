@@ -37,6 +37,8 @@ BuildRequires:  libdisplay-info-devel
 BuildRequires:  libdrm-devel
 BuildRequires:  libepoxy-devel
 BuildRequires:  mesa-libgbm-devel
+BuildRequires:  mesa-libGLES-devel
+BuildRequires:  mesa-libEGL-devel
 BuildRequires:  libinput-devel
 BuildRequires:  libjxl-devel
 BuildRequires:  libliftoff-devel

@@ -1,0 +1,215 @@
+# Dockerfile for building Hyprland 0.52+ and xdg-desktop-portal-hyprland on Fedora 43
+# Usage:
+#   docker build -f Dockerfile.fedora43 -t hyprland-fedora43 .
+#   docker run --rm -v $(pwd)/output:/output hyprland-fedora43
+
+FROM fedora:43 AS builder
+
+# Install base build dependencies (including xdg-desktop-portal-hyprland deps)
+RUN dnf install -y \
+    cmake \
+    gcc \
+    gcc-c++ \
+    git \
+    meson \
+    ninja-build \
+    pkgconf-pkg-config \
+    cairo-devel \
+    glm-devel \
+    glslang-devel \
+    hwdata \
+    libdisplay-info-devel \
+    libdrm-devel \
+    libepoxy-devel \
+    mesa-libgbm-devel \
+    libinput-devel \
+    libjxl-devel \
+    libliftoff-devel \
+    libspng-devel \
+    libwebp-devel \
+    libxcb-devel \
+    libXcursor-devel \
+    libxcvt-devel \
+    libxkbcommon-devel \
+    pango-devel \
+    pixman-devel \
+    pugixml-devel \
+    re2-devel \
+    scdoc \
+    libseat-devel \
+    systemd-devel \
+    tomlplusplus-devel \
+    wayland-devel \
+    wayland-protocols-devel \
+    libzip-devel \
+    librsvg2-devel \
+    libjpeg-turbo-devel \
+    libpng-devel \
+    file-devel \
+    xcb-util-devel \
+    xcb-util-errors-devel \
+    xcb-util-image-devel \
+    xcb-util-renderutil-devel \
+    xcb-util-wm-devel \
+    xorg-x11-server-Xwayland \
+    libXfont2-devel \
+    xkeyboard-config \
+    glib2-devel \
+    libuuid-devel \
+    pipewire-devel \
+    sdbus-cpp-devel \
+    qt6-qtbase-devel \
+    qt6-qtwayland-devel \
+    inih-devel \
+    && dnf clean all
+
+WORKDIR /build
+
+# Build hyprwayland-scanner
+RUN git clone --depth=1 https://github.com/hyprwm/hyprwayland-scanner && \
+    cd hyprwayland-scanner && \
+    cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr -B build && \
+    cmake --build build -j$(nproc) && \
+    cmake --install build && \
+    cd .. && rm -rf hyprwayland-scanner
+
+# Build hyprutils
+RUN git clone --depth=1 https://github.com/hyprwm/hyprutils && \
+    cd hyprutils && \
+    cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr -B build && \
+    cmake --build build -j$(nproc) && \
+    cmake --install build && \
+    cd .. && rm -rf hyprutils
+
+# Build hyprlang
+RUN git clone --depth=1 https://github.com/hyprwm/hyprlang && \
+    cd hyprlang && \
+    cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr -B build && \
+    cmake --build build -j$(nproc) && \
+    cmake --install build && \
+    cd .. && rm -rf hyprlang
+
+# Build hyprcursor
+RUN git clone --depth=1 https://github.com/hyprwm/hyprcursor && \
+    cd hyprcursor && \
+    cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr -B build && \
+    cmake --build build -j$(nproc) && \
+    cmake --install build && \
+    cd .. && rm -rf hyprcursor
+
+# Build hyprgraphics
+RUN git clone --depth=1 https://github.com/hyprwm/hyprgraphics && \
+    cd hyprgraphics && \
+    cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr -B build && \
+    cmake --build build -j$(nproc) && \
+    cmake --install build && \
+    cd .. && rm -rf hyprgraphics
+
+# Create hwdata.pc (Fedora doesn't ship it)
+RUN mkdir -p /usr/share/pkgconfig && \
+    echo 'prefix=/usr' > /usr/share/pkgconfig/hwdata.pc && \
+    echo 'datarootdir=${prefix}/share' >> /usr/share/pkgconfig/hwdata.pc && \
+    echo 'pkgdatadir=${datarootdir}/hwdata' >> /usr/share/pkgconfig/hwdata.pc && \
+    echo '' >> /usr/share/pkgconfig/hwdata.pc && \
+    echo 'Name: hwdata' >> /usr/share/pkgconfig/hwdata.pc && \
+    echo 'Description: Hardware identification databases' >> /usr/share/pkgconfig/hwdata.pc && \
+    echo 'Version: 0.385' >> /usr/share/pkgconfig/hwdata.pc
+
+# Build aquamarine
+RUN git clone --depth=1 https://github.com/hyprwm/aquamarine && \
+    cd aquamarine && \
+    cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr -B build && \
+    cmake --build build -j$(nproc) && \
+    cmake --install build && \
+    cd .. && rm -rf aquamarine
+
+# Copy Hyprland source
+COPY . /build/hyprland
+WORKDIR /build/hyprland
+
+# Build and install hyprland-protocols (required by xdg-desktop-portal-hyprland)
+RUN cd subprojects/hyprland-protocols && \
+    meson setup build --prefix=/usr && \
+    ninja -C build && \
+    ninja -C build install
+
+# Build Hyprland
+RUN cmake --no-warn-unused-cli \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_INSTALL_PREFIX=/usr \
+    -S . -B ./build && \
+    cmake --build ./build --config Release -j$(nproc) && \
+    cmake --install ./build
+
+# Build xdg-desktop-portal-hyprland
+WORKDIR /build
+RUN git clone --depth=1 https://github.com/hyprwm/xdg-desktop-portal-hyprland && \
+    cd xdg-desktop-portal-hyprland && \
+    cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr -B build && \
+    cmake --build build -j$(nproc) && \
+    cmake --install build
+
+# Create output directory and copy artifacts
+WORKDIR /build/hyprland
+RUN mkdir -p /artifacts && \
+    cp build/Hyprland /artifacts/ && \
+    cp build/hyprctl/hyprctl /artifacts/ && \
+    cp build/hyprpm/hyprpm /artifacts/ && \
+    cp -r example /artifacts/ && \
+    cp -r assets /artifacts/ && \
+    cp LICENSE /artifacts/ && \
+    cp /usr/libexec/xdg-desktop-portal-hyprland /artifacts/ && \
+    cp /usr/bin/hyprland-share-picker /artifacts/ 2>/dev/null || true && \
+    mkdir -p /artifacts/portal-data && \
+    cp /usr/share/xdg-desktop-portal/portals/hyprland.portal /artifacts/portal-data/ && \
+    cp /usr/share/dbus-1/services/org.freedesktop.impl.portal.desktop.hyprland.service /artifacts/portal-data/ && \
+    cp /usr/lib/systemd/user/xdg-desktop-portal-hyprland.service /artifacts/portal-data/
+
+# Final stage - minimal image with just binaries
+FROM fedora:43 AS runtime
+
+# Install runtime dependencies only (including portal deps)
+RUN dnf install -y \
+    cairo \
+    hwdata \
+    libdisplay-info \
+    libdrm \
+    libepoxy \
+    mesa-libgbm \
+    libinput \
+    libjxl \
+    libliftoff \
+    libspng \
+    libwebp \
+    libxcb \
+    libXcursor \
+    libxcvt \
+    libxkbcommon \
+    pango \
+    pixman \
+    pugixml \
+    re2 \
+    libseat \
+    libwayland-client \
+    libwayland-server \
+    libzip \
+    librsvg2 \
+    xcb-util \
+    xcb-util-errors \
+    xcb-util-image \
+    xcb-util-renderutil \
+    xcb-util-wm \
+    xorg-x11-server-Xwayland \
+    pipewire \
+    sdbus-cpp \
+    qt6-qtbase \
+    qt6-qtwayland \
+    xdg-desktop-portal \
+    && dnf clean all
+
+COPY --from=builder /artifacts /opt/hyprland
+COPY --from=builder /usr/lib64/libhypr* /usr/lib64/
+COPY --from=builder /usr/lib64/libaquamarine* /usr/lib64/
+
+# Default command - copy to output volume
+CMD ["sh", "-c", "cp -r /opt/hyprland/* /output/ && echo 'Build artifacts copied to /output'"]

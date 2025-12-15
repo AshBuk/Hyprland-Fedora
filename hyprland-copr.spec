@@ -39,6 +39,8 @@ BuildRequires:  libepoxy-devel
 BuildRequires:  mesa-libgbm-devel
 BuildRequires:  mesa-libGLES-devel
 BuildRequires:  mesa-libEGL-devel
+BuildRequires:  libglvnd-devel
+BuildRequires:  libglvnd-gles
 BuildRequires:  libinput-devel
 BuildRequires:  libjxl-devel
 BuildRequires:  libliftoff-devel

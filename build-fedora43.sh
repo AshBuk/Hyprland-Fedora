@@ -16,7 +16,7 @@ mkdir -p "${OUTPUT_DIR}"
 # Build Docker image
 echo ""
 echo "=== Building Docker image... ==="
-docker build -f "${SCRIPT_DIR}/Dockerfile.fedora43" -t "${IMAGE_NAME}" "${SCRIPT_DIR}"
+docker build -f "${SCRIPT_DIR}/../Dockerfile.fedora43" -t "${IMAGE_NAME}" "${SCRIPT_DIR}/.."
 
 # Extract artifacts
 echo ""

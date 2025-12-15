@@ -95,64 +95,72 @@ and much more.
 This build includes the noscreenshare layerrule feature for excluding
 layers from screenshare applications.
 
+Fixed library versions for reproducible builds:
+- hyprwayland-scanner v0.4.4
+- hyprutils v0.11.0
+- hyprlang v0.6.7
+- hyprcursor v0.1.13
+- hyprgraphics v0.4.0
+- aquamarine v0.10.0
+
 %prep
 %autosetup -n %{name}-%{version}
 
-# Build hyprwayland-scanner
+# Build hyprwayland-scanner v0.4.4
 pushd .
 mkdir hyprwayland-scanner-build
 cd hyprwayland-scanner-build
-git clone --depth=1 https://github.com/hyprwm/hyprwayland-scanner .
+git clone --depth=1 --branch v0.4.4 https://github.com/hyprwm/hyprwayland-scanner .
 cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=%{_prefix} -B build
 cmake --build build -j%(nproc)
 cmake --install build --prefix %{_builddir}/hyprwayland-scanner-install
 popd
 
-# Build hyprutils
+# Build hyprutils v0.11.0
 pushd .
 mkdir hyprutils-build
 cd hyprutils-build
-git clone --depth=1 https://github.com/hyprwm/hyprutils .
+git clone --depth=1 --branch v0.11.0 https://github.com/hyprwm/hyprutils .
 cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=%{_prefix} -B build
 cmake --build build -j%(nproc)
 cmake --install build --prefix %{_builddir}/hyprutils-install
 popd
 
-# Build hyprlang
+# Build hyprlang v0.6.7
 pushd .
 mkdir hyprlang-build
 cd hyprlang-build
-git clone --depth=1 https://github.com/hyprwm/hyprlang .
+git clone --depth=1 --branch v0.6.7 https://github.com/hyprwm/hyprlang .
 cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=%{_prefix} -B build
 cmake --build build -j%(nproc)
 cmake --install build --prefix %{_builddir}/hyprlang-install
 popd
 
-# Build hyprcursor
+# Build hyprcursor v0.1.13
 pushd .
 mkdir hyprcursor-build
 cd hyprcursor-build
-git clone --depth=1 https://github.com/hyprwm/hyprcursor .
+git clone --depth=1 --branch v0.1.13 https://github.com/hyprwm/hyprcursor .
 cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=%{_prefix} -B build
 cmake --build build -j%(nproc)
 cmake --install build --prefix %{_builddir}/hyprcursor-install
 popd
 
-# Build hyprgraphics
+# Build hyprgraphics v0.4.0
 pushd .
 mkdir hyprgraphics-build
 cd hyprgraphics-build
-git clone --depth=1 https://github.com/hyprwm/hyprgraphics .
+git clone --depth=1 --branch v0.4.0 https://github.com/hyprwm/hyprgraphics .
 cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=%{_prefix} -B build
 cmake --build build -j%(nproc)
 cmake --install build --prefix %{_builddir}/hyprgraphics-install
 popd
 
-# Build aquamarine
+# Build aquamarine v0.10.0
 pushd .
 mkdir aquamarine-build
 cd aquamarine-build
-git clone --depth=1 https://github.com/hyprwm/aquamarine .
+git clone --depth=1 --branch v0.10.0 https://github.com/hyprwm/aquamarine .
 cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=%{_prefix} -B build
 cmake --build build -j%(nproc)
 cmake --install build --prefix %{_builddir}/aquamarine-install
@@ -201,5 +209,6 @@ EOF
 %{_datadir}/xdg-desktop-portal/
 
 %changelog
-* Thu Dec 11 2025 Local Build <local@localhost> - 0.52.2-1
+* Mon Dec 15 2025 Asher Buk <asherbuk@example.com> - 0.52.2-1
+- Update to 0.52.2 with fixed library versions for reproducible builds
 - Custom build for Fedora 43 with noscreenshare support

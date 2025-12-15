@@ -194,7 +194,8 @@ popd
 # 6) aquamarine (needs GCC15 compat flags for generated protocol code)
 pushd aquamarine-0.10.0
 cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$VENDOR_PREFIX" -DCMAKE_PREFIX_PATH="$VENDOR_PREFIX" \
-  -DCMAKE_CXX_FLAGS="$GCC15_COMPAT" -DCMAKE_C_FLAGS="$GCC15_COMPAT"
+  -DCMAKE_CXX_FLAGS="$GCC15_COMPAT" -DCMAKE_C_FLAGS="$GCC15_COMPAT" \
+  -DOpenGL_GL_PREFERENCE=GLVND
 cmake --build build --parallel %{_smp_build_ncpus}
 cmake --install build
 popd

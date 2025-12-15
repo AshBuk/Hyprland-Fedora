@@ -5,19 +5,30 @@ Summary:        Dynamic tiling Wayland compositor
 License:        BSD-3-Clause
 URL:            https://github.com/hyprwm/Hyprland
 
-Source0:  https://github.com/hyprwm/Hyprland/archive/refs/tags/v%{version}.tar.gz#/%{name}-%{version}.tar.gz
-Source1:  https://github.com/hyprwm/hyprwayland-scanner/archive/refs/tags/v0.4.4.tar.gz
-Source2:  https://github.com/hyprwm/hyprutils/archive/refs/tags/v0.11.0.tar.gz
-Source3:  https://github.com/hyprwm/hyprlang/archive/refs/tags/v0.6.7.tar.gz
-Source4:  https://github.com/hyprwm/hyprcursor/archive/refs/tags/v0.1.13.tar.gz
-Source5:  https://github.com/hyprwm/hyprgraphics/archive/refs/tags/v0.4.0.tar.gz
-Source6:  https://github.com/hyprwm/aquamarine/archive/refs/tags/v0.10.0.tar.gz
+# Main source
+Source0:        https://github.com/hyprwm/Hyprland/archive/refs/tags/v%{version}.tar.gz#/%{name}-%{version}.tar.gz
 
+# Git submodules (not included in GitHub tarball)
+Source10:       https://github.com/hyprwm/hyprland-protocols/archive/refs/tags/v0.6.4.tar.gz#/hyprland-protocols-0.6.4.tar.gz
+Source11:       https://github.com/canihavesomecoffee/udis86/archive/refs/tags/v1.7.2.tar.gz#/udis86-1.7.2.tar.gz
+
+# Hyprland pinned deps (vendored, fixed versions)
+Source20:       https://github.com/hyprwm/hyprwayland-scanner/archive/refs/tags/v0.4.4.tar.gz#/hyprwayland-scanner-0.4.4.tar.gz
+Source21:       https://github.com/hyprwm/hyprutils/archive/refs/tags/v0.11.0.tar.gz#/hyprutils-0.11.0.tar.gz
+Source22:       https://github.com/hyprwm/hyprlang/archive/refs/tags/v0.6.7.tar.gz#/hyprlang-0.6.7.tar.gz
+Source23:       https://github.com/hyprwm/hyprcursor/archive/refs/tags/v0.1.13.tar.gz#/hyprcursor-0.1.13.tar.gz
+Source24:       https://github.com/hyprwm/hyprgraphics/archive/refs/tags/v0.4.0.tar.gz#/hyprgraphics-0.4.0.tar.gz
+Source25:       https://github.com/hyprwm/aquamarine/archive/refs/tags/v0.10.0.tar.gz#/aquamarine-0.10.0.tar.gz
+
+# Build dependencies
 BuildRequires:  cmake
 BuildRequires:  gcc-c++
 BuildRequires:  meson
 BuildRequires:  ninja-build
 BuildRequires:  pkgconf-pkg-config
+BuildRequires:  patchelf
+
+# Library dependencies (system)
 BuildRequires:  cairo-devel
 BuildRequires:  glm-devel
 BuildRequires:  glslang-devel
@@ -61,57 +72,150 @@ BuildRequires:  xkeyboard-config
 BuildRequires:  glib2-devel
 BuildRequires:  libuuid-devel
 
-Requires: cairo
-Requires: hwdata
-Requires: libdisplay-info
-Requires: libdrm
-Requires: libepoxy
-Requires: mesa-libgbm
-Requires: libinput
-Requires: libjxl
-Requires: libliftoff
-Requires: libspng
-Requires: libwebp
-Requires: libxcb
-Requires: libXcursor
-Requires: libxcvt
-Requires: libxkbcommon
-Requires: pango
-Requires: pixman
-Requires: pugixml
-Requires: re2
-Requires: libseat
-Requires: libwayland-client
-Requires: libwayland-server
-Requires: libzip
-Requires: librsvg2
-Requires: xcb-util
-Requires: xcb-util-errors
-Requires: xcb-util-image
-Requires: xcb-util-renderutil
-Requires: xcb-util-wm
-Requires: xorg-x11-server-Xwayland
+# Runtime deps (system)
+Requires:       cairo
+Requires:       hwdata
+Requires:       libdisplay-info
+Requires:       libdrm
+Requires:       libepoxy
+Requires:       mesa-libgbm
+Requires:       libinput
+Requires:       libjxl
+Requires:       libliftoff
+Requires:       libspng
+Requires:       libwebp
+Requires:       libxcb
+Requires:       libXcursor
+Requires:       libxcvt
+Requires:       libxkbcommon
+Requires:       pango
+Requires:       pixman
+Requires:       pugixml
+Requires:       re2
+Requires:       libseat
+Requires:       libwayland-client
+Requires:       libwayland-server
+Requires:       libzip
+Requires:       librsvg2
+Requires:       xcb-util
+Requires:       xcb-util-errors
+Requires:       xcb-util-image
+Requires:       xcb-util-renderutil
+Requires:       xcb-util-wm
+Requires:       xorg-x11-server-Xwayland
 
 %description
-Hyprland is a dynamic tiling Wayland compositor with modern features,
+Hyprland is a dynamic tiling Wayland compositor with modern Wayland features,
 high customizability, IPC, plugins, and visual effects.
 
-This build pins internal Hyprland dependencies to fixed upstream versions
-for reproducible Fedora 43 builds.
+This is a single-package COPR build for Fedora 43.
+Pinned Hyprland dependencies are built from fixed-version sources and installed
+into a private vendor prefix to avoid polluting system /usr/lib64.
 
 %prep
-%autosetup -n Hyprland-%{version} -a1 -a2 -a3 -a4 -a5 -a6
+%autosetup -n Hyprland-%{version}
+
+# Unpack submodules into correct locations
+rm -rf subprojects/hyprland-protocols subprojects/udis86
+tar -xzf %{SOURCE10} -C subprojects
+mv subprojects/hyprland-protocols-0.6.4 subprojects/hyprland-protocols
+tar -xzf %{SOURCE11} -C subprojects
+mv subprojects/udis86-1.7.2 subprojects/udis86
+
+# Unpack vendored deps in top build dir
+tar -xzf %{SOURCE20}
+tar -xzf %{SOURCE21}
+tar -xzf %{SOURCE22}
+tar -xzf %{SOURCE23}
+tar -xzf %{SOURCE24}
+tar -xzf %{SOURCE25}
 
 %build
-export CMAKE_PREFIX_PATH=%{_builddir}/hyprwayland-scanner-0.4.4:%{_builddir}/hyprutils-0.11.0:%{_builddir}/hyprlang-0.6.7:%{_builddir}/hyprcursor-0.1.13:%{_builddir}/hyprgraphics-0.4.0:%{_builddir}/aquamarine-0.10.0
+# hwdata.pc for pkg-config consumers
+mkdir -p pkgconfig
+cat > pkgconfig/hwdata.pc << 'EOF'
+prefix=/usr
+datarootdir=${prefix}/share
+pkgdatadir=${datarootdir}/hwdata
 
-%cmake -DCMAKE_BUILD_TYPE=Release
-%cmake_build
+Name: hwdata
+Description: Hardware identification databases
+Version: 0.385
+EOF
+
+VENDOR_PREFIX="$(pwd)/vendor"
+export PATH="$VENDOR_PREFIX/bin:$PATH"
+export PKG_CONFIG_PATH="$VENDOR_PREFIX/lib64/pkgconfig:$VENDOR_PREFIX/lib/pkgconfig:$(pwd)/pkgconfig:%{_libdir}/pkgconfig:%{_datadir}/pkgconfig"
+export CMAKE_PREFIX_PATH="$VENDOR_PREFIX"
+
+# 1) hyprwayland-scanner (build tool)
+pushd hyprwayland-scanner-0.4.4
+cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$VENDOR_PREFIX"
+cmake --build build --parallel %{_smp_build_ncpus}
+cmake --install build
+popd
+
+# 2) hyprutils
+pushd hyprutils-0.11.0
+cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$VENDOR_PREFIX" -DCMAKE_PREFIX_PATH="$VENDOR_PREFIX"
+cmake --build build --parallel %{_smp_build_ncpus}
+cmake --install build
+popd
+
+# 3) hyprlang
+pushd hyprlang-0.6.7
+cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$VENDOR_PREFIX" -DCMAKE_PREFIX_PATH="$VENDOR_PREFIX"
+cmake --build build --parallel %{_smp_build_ncpus}
+cmake --install build
+popd
+
+# 4) hyprcursor
+pushd hyprcursor-0.1.13
+cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$VENDOR_PREFIX" -DCMAKE_PREFIX_PATH="$VENDOR_PREFIX"
+cmake --build build --parallel %{_smp_build_ncpus}
+cmake --install build
+popd
+
+# 5) hyprgraphics
+pushd hyprgraphics-0.4.0
+cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$VENDOR_PREFIX" -DCMAKE_PREFIX_PATH="$VENDOR_PREFIX"
+cmake --build build --parallel %{_smp_build_ncpus}
+cmake --install build
+popd
+
+# 6) aquamarine
+pushd aquamarine-0.10.0
+cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$VENDOR_PREFIX" -DCMAKE_PREFIX_PATH="$VENDOR_PREFIX"
+cmake --build build --parallel %{_smp_build_ncpus}
+cmake --install build
+popd
+
+# 7) hyprland-protocols
+pushd subprojects/hyprland-protocols
+meson setup build --prefix="$VENDOR_PREFIX"
+ninja -C build
+ninja -C build install
+popd
+
+# 8) Hyprland
+cmake -B build \
+  -DCMAKE_BUILD_TYPE=Release \
+  -DCMAKE_INSTALL_PREFIX=%{_prefix} \
+  -DCMAKE_PREFIX_PATH="$VENDOR_PREFIX"
+cmake --build build --parallel %{_smp_build_ncpus}
 
 %install
-%cmake_install
+VENDOR_PREFIX="$(pwd)/vendor"
 
-mkdir -p %{buildroot}%{_datadir}/wayland-sessions
+# Install Hyprland binaries/data
+DESTDIR=%{buildroot} cmake --install build
+
+# Ensure "hyprland" alias exists (some setups expect it)
+ln -sf Hyprland %{buildroot}%{_bindir}/hyprland
+
+# Ensure session desktop entry exists
+install -d %{buildroot}%{_datadir}/wayland-sessions
+if [ ! -f %{buildroot}%{_datadir}/wayland-sessions/hyprland.desktop ]; then
 cat > %{buildroot}%{_datadir}/wayland-sessions/hyprland.desktop << 'EOF'
 [Desktop Entry]
 Name=Hyprland
@@ -120,19 +224,37 @@ Exec=Hyprland
 Type=Application
 DesktopNames=Hyprland
 EOF
+fi
+
+# Install vendored runtime libs into private prefix
+VENDOR_DST=%{buildroot}%{_libexecdir}/%{name}/vendor
+install -d "$VENDOR_DST/lib64" "$VENDOR_DST/lib"
+cp -a "$VENDOR_PREFIX"/lib64/lib*.so* "$VENDOR_DST/lib64/" 2>/dev/null || true
+cp -a "$VENDOR_PREFIX"/lib/lib*.so*   "$VENDOR_DST/lib/"   2>/dev/null || true
+
+# Set RPATH on binaries to use vendored libs
+RPATH='$ORIGIN/../libexec/hyprland/vendor/lib64:$ORIGIN/../libexec/hyprland/vendor/lib'
+for bin in %{buildroot}%{_bindir}/Hyprland %{buildroot}%{_bindir}/hyprctl %{buildroot}%{_bindir}/hyprpm; do
+  [ -x "$bin" ] || continue
+  patchelf --set-rpath "$RPATH" "$bin"
+done
 
 %files
 %license LICENSE
 %doc README.md
 %{_bindir}/Hyprland
+%{_bindir}/hyprland
 %{_bindir}/hyprctl
 %{_bindir}/hyprpm
+%dir %{_libexecdir}/%{name}
+%{_libexecdir}/%{name}/vendor/
 %{_datadir}/wayland-sessions/hyprland.desktop
-%{_datadir}/hyprland/
-%{_datadir}/xdg-desktop-portal/
+%{_datadir}/hypr/
+%{_datadir}/xdg-desktop-portal/hyprland-portals.conf
+%{_includedir}/hyprland/
 
 %changelog
 * Mon Dec 15 2025 Asher Buk <asherbuk@example.com> - 0.52.2-1
-- Update to Hyprland 0.52.2
-- Fixed internal dependency versions for reproducible COPR builds
-- Fedora 43 custom build
+- Single-package COPR build for Fedora 43
+- Pinned Hyprland deps built from fixed-version sources
+- Vendored runtime libs in /usr/libexec to avoid system library conflicts

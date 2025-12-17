@@ -13,7 +13,7 @@ Source10:       https://github.com/hyprwm/hyprland-protocols/archive/refs/tags/v
 Source11:       https://github.com/canihavesomecoffee/udis86/archive/refs/tags/v1.7.2.tar.gz#/udis86-1.7.2.tar.gz
 
 # Hyprland pinned deps (vendored, fixed versions)
-Source20:       https://github.com/hyprwm/hyprwayland-scanner/archive/refs/tags/v0.4.4.tar.gz#/hyprwayland-scanner-0.4.4.tar.gz
+Source20:       https://github.com/hyprwm/hyprwayland-scanner/archive/refs/tags/v0.4.5.tar.gz#/hyprwayland-scanner-0.4.5.tar.gz
 Source21:       https://github.com/hyprwm/hyprutils/archive/refs/tags/v0.11.0.tar.gz#/hyprutils-0.11.0.tar.gz
 Source22:       https://github.com/hyprwm/hyprlang/archive/refs/tags/v0.6.7.tar.gz#/hyprlang-0.6.7.tar.gz
 Source23:       https://github.com/hyprwm/hyprcursor/archive/refs/tags/v0.1.13.tar.gz#/hyprcursor-0.1.13.tar.gz
@@ -166,7 +166,7 @@ export OPENGL_EGL_INCLUDE_DIR=/usr/include
 export OPENGL_INCLUDE_DIR=/usr/include
 
 # 1) hyprwayland-scanner (build tool)
-pushd hyprwayland-scanner-0.4.4
+pushd hyprwayland-scanner-0.4.5
 cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$VENDOR_PREFIX" \
   -DCMAKE_INSTALL_LIBDIR=lib64
 cmake --build build --parallel %{_smp_build_ncpus}

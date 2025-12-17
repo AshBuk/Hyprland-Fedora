@@ -162,42 +162,53 @@ export OPENGL_GLES3_INCLUDE_DIR=/usr/include
 
 # 1) hyprwayland-scanner (build tool)
 pushd hyprwayland-scanner-0.4.4
-cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$VENDOR_PREFIX"
+cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$VENDOR_PREFIX" \
+  -DCMAKE_INSTALL_LIBDIR=lib64
 cmake --build build --parallel %{_smp_build_ncpus}
 cmake --install build
 popd
 
+# Verify hyprwayland-scanner cmake config is installed
+ls -la "$VENDOR_PREFIX/lib64/cmake/hyprwayland-scanner/" || ls -la "$VENDOR_PREFIX/lib/cmake/hyprwayland-scanner/" || true
+
 # 2) hyprutils
 pushd hyprutils-0.11.0
-cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$VENDOR_PREFIX" -DCMAKE_PREFIX_PATH="$VENDOR_PREFIX"
+cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$VENDOR_PREFIX" \
+  -DCMAKE_PREFIX_PATH="$VENDOR_PREFIX" -DCMAKE_INSTALL_LIBDIR=lib64
 cmake --build build --parallel %{_smp_build_ncpus}
 cmake --install build
 popd
 
 # 3) hyprlang
 pushd hyprlang-0.6.7
-cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$VENDOR_PREFIX" -DCMAKE_PREFIX_PATH="$VENDOR_PREFIX"
+cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$VENDOR_PREFIX" \
+  -DCMAKE_PREFIX_PATH="$VENDOR_PREFIX" -DCMAKE_INSTALL_LIBDIR=lib64
 cmake --build build --parallel %{_smp_build_ncpus}
 cmake --install build
 popd
 
 # 4) hyprcursor
 pushd hyprcursor-0.1.13
-cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$VENDOR_PREFIX" -DCMAKE_PREFIX_PATH="$VENDOR_PREFIX"
+cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$VENDOR_PREFIX" \
+  -DCMAKE_PREFIX_PATH="$VENDOR_PREFIX" -DCMAKE_INSTALL_LIBDIR=lib64
 cmake --build build --parallel %{_smp_build_ncpus}
 cmake --install build
 popd
 
 # 5) hyprgraphics
 pushd hyprgraphics-0.4.0
-cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$VENDOR_PREFIX" -DCMAKE_PREFIX_PATH="$VENDOR_PREFIX"
+cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$VENDOR_PREFIX" \
+  -DCMAKE_PREFIX_PATH="$VENDOR_PREFIX" -DCMAKE_INSTALL_LIBDIR=lib64
 cmake --build build --parallel %{_smp_build_ncpus}
 cmake --install build
 popd
 
 # 6) aquamarine (needs GCC15 compat flags for generated protocol code)
+# Explicitly set hyprwayland-scanner_DIR since CMAKE_PREFIX_PATH may not work in mock chroot
 pushd aquamarine-0.10.0
-cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$VENDOR_PREFIX" -DCMAKE_PREFIX_PATH="$VENDOR_PREFIX" \
+cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$VENDOR_PREFIX" \
+  -DCMAKE_PREFIX_PATH="$VENDOR_PREFIX" -DCMAKE_INSTALL_LIBDIR=lib64 \
+  -Dhyprwayland-scanner_DIR="$VENDOR_PREFIX/lib64/cmake/hyprwayland-scanner" \
   -DCMAKE_CXX_FLAGS="$GCC15_COMPAT" -DCMAKE_C_FLAGS="$GCC15_COMPAT" \
   -DOpenGL_GL_PREFERENCE=GLVND \
   -DOPENGL_gles3_LIBRARY=%{_libdir}/libGLESv2.so \
@@ -218,6 +229,7 @@ cmake -B build \
   -DCMAKE_BUILD_TYPE=Release \
   -DCMAKE_INSTALL_PREFIX=%{_prefix} \
   -DCMAKE_PREFIX_PATH="$VENDOR_PREFIX" \
+  -Dhyprwayland-scanner_DIR="$VENDOR_PREFIX/lib64/cmake/hyprwayland-scanner" \
   -DCMAKE_CXX_FLAGS="$GCC15_COMPAT" -DCMAKE_C_FLAGS="$GCC15_COMPAT" \
   -DOPENGL_gles3_LIBRARY=%{_libdir}/libGLESv2.so \
   -DOPENGL_GLES3_INCLUDE_DIR=/usr/include

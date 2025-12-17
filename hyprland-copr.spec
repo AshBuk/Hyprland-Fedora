@@ -246,6 +246,7 @@ popd
 
 # 8) Hyprland (needs -fpermissive for generated protocol code with zero-size arrays)
 # Use local glaze source (mock chroot has no network for FetchContent)
+# Disable BUILD_TESTING to skip hyprtester (its plugin Makefile doesn't support vendored deps)
 cmake -B build \
   -DCMAKE_BUILD_TYPE=Release \
   -DCMAKE_INSTALL_PREFIX=%{_prefix} \
@@ -253,6 +254,7 @@ cmake -B build \
   -Dhyprwayland-scanner_DIR="$VENDOR_PREFIX/lib64/cmake/hyprwayland-scanner" \
   -DCMAKE_CXX_FLAGS="$GCC15_CXXFLAGS" \
   -DFETCHCONTENT_SOURCE_DIR_GLAZE="$(pwd)/glaze-5.1.1" \
+  -DBUILD_TESTING=OFF \
   -DOPENGL_opengl_LIBRARY=%{_libdir}/libOpenGL.so \
   -DOPENGL_gles3_LIBRARY=%{_libdir}/libGLESv2.so \
   -DOPENGL_GLES3_INCLUDE_DIR=/usr/include \

@@ -37,7 +37,6 @@ BuildRequires:  libdisplay-info-devel
 BuildRequires:  libdrm-devel
 BuildRequires:  libepoxy-devel
 BuildRequires:  mesa-libgbm-devel
-BuildRequires:  mesa-libGLES-devel
 BuildRequires:  mesa-libEGL-devel
 BuildRequires:  libglvnd-devel
 BuildRequires:  libglvnd-gles
@@ -156,6 +155,11 @@ export CMAKE_PREFIX_PATH="$VENDOR_PREFIX"
 # Must pass directly to cmake as env vars may not propagate
 GCC15_COMPAT="-fpermissive"
 
+# OpenGL/GLES3 detection: CMake FindOpenGL needs explicit hints for libglvnd on Fedora
+# libglvnd provides libGLESv2.so which covers both GLES2 and GLES3
+export OPENGL_gles3_LIBRARY=%{_libdir}/libGLESv2.so
+export OPENGL_GLES3_INCLUDE_DIR=/usr/include
+
 # 1) hyprwayland-scanner (build tool)
 pushd hyprwayland-scanner-0.4.4
 cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$VENDOR_PREFIX"
@@ -195,7 +199,9 @@ popd
 pushd aquamarine-0.10.0
 cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$VENDOR_PREFIX" -DCMAKE_PREFIX_PATH="$VENDOR_PREFIX" \
   -DCMAKE_CXX_FLAGS="$GCC15_COMPAT" -DCMAKE_C_FLAGS="$GCC15_COMPAT" \
-  -DOpenGL_GL_PREFERENCE=GLVND
+  -DOpenGL_GL_PREFERENCE=GLVND \
+  -DOPENGL_gles3_LIBRARY=%{_libdir}/libGLESv2.so \
+  -DOPENGL_GLES3_INCLUDE_DIR=/usr/include
 cmake --build build --parallel %{_smp_build_ncpus}
 cmake --install build
 popd
@@ -212,7 +218,9 @@ cmake -B build \
   -DCMAKE_BUILD_TYPE=Release \
   -DCMAKE_INSTALL_PREFIX=%{_prefix} \
   -DCMAKE_PREFIX_PATH="$VENDOR_PREFIX" \
-  -DCMAKE_CXX_FLAGS="$GCC15_COMPAT" -DCMAKE_C_FLAGS="$GCC15_COMPAT"
+  -DCMAKE_CXX_FLAGS="$GCC15_COMPAT" -DCMAKE_C_FLAGS="$GCC15_COMPAT" \
+  -DOPENGL_gles3_LIBRARY=%{_libdir}/libGLESv2.so \
+  -DOPENGL_GLES3_INCLUDE_DIR=/usr/include
 cmake --build build --parallel %{_smp_build_ncpus}
 
 %install

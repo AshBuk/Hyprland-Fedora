@@ -156,11 +156,13 @@ export CMAKE_PREFIX_PATH="$VENDOR_PREFIX"
 GCC15_COMPAT="-fpermissive"
 
 # OpenGL/GLES3/EGL detection: CMake FindOpenGL needs explicit hints for libglvnd on Fedora
-# libglvnd provides libGLESv2.so (GLES2/3) and libEGL.so
+# libglvnd provides libGLESv2.so (GLES2/3), libEGL.so, and libOpenGL.so
+export OPENGL_opengl_LIBRARY=%{_libdir}/libOpenGL.so
 export OPENGL_gles3_LIBRARY=%{_libdir}/libGLESv2.so
 export OPENGL_GLES3_INCLUDE_DIR=/usr/include
 export OPENGL_egl_LIBRARY=%{_libdir}/libEGL.so
 export OPENGL_EGL_INCLUDE_DIR=/usr/include
+export OPENGL_INCLUDE_DIR=/usr/include
 
 # 1) hyprwayland-scanner (build tool)
 pushd hyprwayland-scanner-0.4.4
@@ -214,10 +216,12 @@ cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$VENDOR_PREFIX
   -Dhyprwayland-scanner_DIR="$VENDOR_PREFIX/lib64/cmake/hyprwayland-scanner" \
   -DCMAKE_CXX_FLAGS="$GCC15_COMPAT" -DCMAKE_C_FLAGS="$GCC15_COMPAT" \
   -DOpenGL_GL_PREFERENCE=GLVND \
+  -DOPENGL_opengl_LIBRARY=%{_libdir}/libOpenGL.so \
   -DOPENGL_gles3_LIBRARY=%{_libdir}/libGLESv2.so \
   -DOPENGL_GLES3_INCLUDE_DIR=/usr/include \
   -DOPENGL_egl_LIBRARY=%{_libdir}/libEGL.so \
-  -DOPENGL_EGL_INCLUDE_DIR=/usr/include
+  -DOPENGL_EGL_INCLUDE_DIR=/usr/include \
+  -DOPENGL_INCLUDE_DIR=/usr/include
 cmake --build build --parallel %{_smp_build_ncpus}
 cmake --install build
 popd
@@ -236,10 +240,12 @@ cmake -B build \
   -DCMAKE_PREFIX_PATH="$VENDOR_PREFIX" \
   -Dhyprwayland-scanner_DIR="$VENDOR_PREFIX/lib64/cmake/hyprwayland-scanner" \
   -DCMAKE_CXX_FLAGS="$GCC15_COMPAT" -DCMAKE_C_FLAGS="$GCC15_COMPAT" \
+  -DOPENGL_opengl_LIBRARY=%{_libdir}/libOpenGL.so \
   -DOPENGL_gles3_LIBRARY=%{_libdir}/libGLESv2.so \
   -DOPENGL_GLES3_INCLUDE_DIR=/usr/include \
   -DOPENGL_egl_LIBRARY=%{_libdir}/libEGL.so \
-  -DOPENGL_EGL_INCLUDE_DIR=/usr/include
+  -DOPENGL_EGL_INCLUDE_DIR=/usr/include \
+  -DOPENGL_INCLUDE_DIR=/usr/include
 cmake --build build --parallel %{_smp_build_ncpus}
 
 %install

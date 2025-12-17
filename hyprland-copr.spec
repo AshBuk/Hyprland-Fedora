@@ -11,7 +11,7 @@ Source0:        https://github.com/hyprwm/Hyprland/archive/refs/tags/v%{version}
 # Git submodules (not included in GitHub tarball)
 Source10:       https://github.com/hyprwm/hyprland-protocols/archive/refs/tags/v0.6.4.tar.gz#/hyprland-protocols-0.6.4.tar.gz
 # udis86 from Hyprland subprojects (patched for Python 3.x, with CMakeLists.txt)
-Source11:       udis86-hyprland.tar.gz
+Source11:       https://github.com/AshBuk/Hyprland-Fedora/releases/download/v0.52.2-fedora/udis86-hyprland.tar.gz
 
 # Hyprland pinned deps (vendored, fixed versions)
 Source20:       https://github.com/hyprwm/hyprwayland-scanner/archive/refs/tags/v0.4.5.tar.gz#/hyprwayland-scanner-0.4.5.tar.gz
@@ -21,8 +21,9 @@ Source23:       https://github.com/hyprwm/hyprcursor/archive/refs/tags/v0.1.13.t
 Source24:       https://github.com/hyprwm/hyprgraphics/archive/refs/tags/v0.4.0.tar.gz#/hyprgraphics-0.4.0.tar.gz
 Source25:       https://github.com/hyprwm/aquamarine/archive/refs/tags/v0.10.0.tar.gz#/aquamarine-0.10.0.tar.gz
 
-# glaze JSON library (for hyprpm, mock chroot has no network)
-Source30:       https://github.com/stephenberry/glaze/archive/refs/tags/v5.1.1.tar.gz#/glaze-5.1.1.tar.gz
+# glaze JSON library (for hyprpm, mock chroot has no network for FetchContent)
+# Using our release mirror to ensure availability
+Source30:       https://github.com/AshBuk/Hyprland-Fedora/releases/download/v0.52.2-fedora/glaze-5.1.1.tar.gz
 
 # Build dependencies
 BuildRequires:  cmake

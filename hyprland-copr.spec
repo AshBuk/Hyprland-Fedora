@@ -10,7 +10,8 @@ Source0:        https://github.com/hyprwm/Hyprland/archive/refs/tags/v%{version}
 
 # Git submodules (not included in GitHub tarball)
 Source10:       https://github.com/hyprwm/hyprland-protocols/archive/refs/tags/v0.6.4.tar.gz#/hyprland-protocols-0.6.4.tar.gz
-Source11:       https://github.com/canihavesomecoffee/udis86/archive/refs/tags/v1.7.2.tar.gz#/udis86-1.7.2.tar.gz
+# udis86 from Hyprland subprojects (patched for Python 3.x, with CMakeLists.txt)
+Source11:       udis86-hyprland.tar.gz
 
 # Hyprland pinned deps (vendored, fixed versions)
 Source20:       https://github.com/hyprwm/hyprwayland-scanner/archive/refs/tags/v0.4.5.tar.gz#/hyprwayland-scanner-0.4.5.tar.gz
@@ -19,6 +20,9 @@ Source22:       https://github.com/hyprwm/hyprlang/archive/refs/tags/v0.6.7.tar.
 Source23:       https://github.com/hyprwm/hyprcursor/archive/refs/tags/v0.1.13.tar.gz#/hyprcursor-0.1.13.tar.gz
 Source24:       https://github.com/hyprwm/hyprgraphics/archive/refs/tags/v0.4.0.tar.gz#/hyprgraphics-0.4.0.tar.gz
 Source25:       https://github.com/hyprwm/aquamarine/archive/refs/tags/v0.10.0.tar.gz#/aquamarine-0.10.0.tar.gz
+
+# glaze JSON library (for hyprpm, mock chroot has no network)
+Source30:       https://github.com/stephenberry/glaze/archive/refs/tags/v5.1.1.tar.gz#/glaze-5.1.1.tar.gz
 
 # Build dependencies
 BuildRequires:  cmake
@@ -124,66 +128,8 @@ into a private vendor prefix to avoid polluting system /usr/lib64.
 rm -rf subprojects/hyprland-protocols subprojects/udis86
 tar -xzf %{SOURCE10} -C subprojects
 mv subprojects/hyprland-protocols-0.6.4 subprojects/hyprland-protocols
+# udis86 from Hyprland subprojects (patched for Python 3.x, includes CMakeLists.txt)
 tar -xzf %{SOURCE11} -C subprojects
-mv subprojects/udis86-1.7.2 subprojects/udis86
-
-# udis86 from GitHub doesn't have CMakeLists.txt - create them (from Hyprland subproject)
-cat > subprojects/udis86/CMakeLists.txt << 'UDIS86_ROOT_CMAKE'
-cmake_minimum_required(VERSION 3.12)
-project(udis86 LANGUAGES C)
-
-include_directories("${PROJECT_SOURCE_DIR}")
-
-add_subdirectory(libudis86)
-add_subdirectory(udcli)
-
-add_library(udis86 INTERFACE)
-target_include_directories(udis86 INTERFACE ${CMAKE_SOURCE_DIR})
-target_link_libraries(udis86 INTERFACE libudis86)
-UDIS86_ROOT_CMAKE
-
-cat > subprojects/udis86/libudis86/CMakeLists.txt << 'UDIS86_LIB_CMAKE'
-cmake_minimum_required(VERSION 3.12)
-project(libudis86 LANGUAGES C)
-
-set(CMAKE_C_STANDARD 99)
-
-if(NOT EXISTS ${PROJECT_SOURCE_DIR}/itab.c OR NOT EXISTS ${PROJECT_SOURCE_DIR}/itab.h)
-	find_package(Python3 COMPONENTS Interpreter)
-	set(OPTABLE ${PROJECT_SOURCE_DIR}/../docs/x86/optable.xml)
-	message("Building itab.c/itab.h...")
-	execute_process(
-		COMMAND ${Python3_EXECUTABLE} ${PROJECT_SOURCE_DIR}/../scripts/ud_itab.py ${OPTABLE} .
-		WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-	)
-endif()
-
-set(FILES
-	decode.c
-	decode.h
-	extern.h
-	itab.c
-	itab.h
-	syn-att.c
-	syn-intel.c
-	syn.c
-	syn.h
-	types.h
-	udint.h
-	udis86.c)
-
-add_library(libudis86 STATIC ${FILES})
-
-target_include_directories(libudis86 PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
-UDIS86_LIB_CMAKE
-
-cat > subprojects/udis86/udcli/CMakeLists.txt << 'UDIS86_CLI_CMAKE'
-cmake_minimum_required(VERSION 3.12)
-project(udcli LANGUAGES C)
-
-add_executable(udcli EXCLUDE_FROM_ALL udcli.c)
-target_link_libraries(udcli udis86)
-UDIS86_CLI_CMAKE
 
 # Unpack vendored deps in top build dir
 tar -xzf %{SOURCE20}
@@ -192,6 +138,9 @@ tar -xzf %{SOURCE22}
 tar -xzf %{SOURCE23}
 tar -xzf %{SOURCE24}
 tar -xzf %{SOURCE25}
+
+# Unpack glaze (for hyprpm, mock chroot has no network for FetchContent)
+tar -xzf %{SOURCE30}
 
 %build
 # hwdata.pc for pkg-config consumers
@@ -295,12 +244,14 @@ ninja -C build install
 popd
 
 # 8) Hyprland (needs -fpermissive for generated protocol code with zero-size arrays)
+# Use local glaze source (mock chroot has no network for FetchContent)
 cmake -B build \
   -DCMAKE_BUILD_TYPE=Release \
   -DCMAKE_INSTALL_PREFIX=%{_prefix} \
   -DCMAKE_PREFIX_PATH="$VENDOR_PREFIX" \
   -Dhyprwayland-scanner_DIR="$VENDOR_PREFIX/lib64/cmake/hyprwayland-scanner" \
   -DCMAKE_CXX_FLAGS="$GCC15_CXXFLAGS" \
+  -DFETCHCONTENT_SOURCE_DIR_GLAZE="$(pwd)/glaze-5.1.1" \
   -DOPENGL_opengl_LIBRARY=%{_libdir}/libOpenGL.so \
   -DOPENGL_gles3_LIBRARY=%{_libdir}/libGLESv2.so \
   -DOPENGL_GLES3_INCLUDE_DIR=/usr/include \

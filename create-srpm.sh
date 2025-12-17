@@ -7,13 +7,16 @@ RELEASE="1"
 
 # Dependency versions (must match spec file)
 HYPRLAND_PROTOCOLS_VER="0.6.4"
-UDIS86_VER="1.7.2"
 HYPRWAYLAND_SCANNER_VER="0.4.5"
 HYPRUTILS_VER="0.11.0"
 HYPRLANG_VER="0.6.7"
 HYPRCURSOR_VER="0.1.13"
 HYPRGRAPHICS_VER="0.4.0"
 AQUAMARINE_VER="0.10.0"
+GLAZE_VER="5.1.1"
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(dirname "$SCRIPT_DIR")"
 
 echo "=== Creating SRPM for Hyprland ${VERSION} ==="
 
@@ -34,10 +37,10 @@ if [ ! -f "hyprland-protocols-${HYPRLAND_PROTOCOLS_VER}.tar.gz" ]; then
          "https://github.com/hyprwm/hyprland-protocols/archive/refs/tags/v${HYPRLAND_PROTOCOLS_VER}.tar.gz"
 fi
 
-if [ ! -f "udis86-${UDIS86_VER}.tar.gz" ]; then
-    echo "Downloading udis86..."
-    curl -L -o "udis86-${UDIS86_VER}.tar.gz" \
-         "https://github.com/canihavesomecoffee/udis86/archive/refs/tags/v${UDIS86_VER}.tar.gz"
+# udis86: use local subproject (patched for Python 3.x, includes CMakeLists.txt)
+if [ ! -f "udis86-hyprland.tar.gz" ]; then
+    echo "Creating udis86 tarball from local subproject..."
+    (cd "$REPO_ROOT/subprojects" && tar -czvf "$SCRIPT_DIR/sources/udis86-hyprland.tar.gz" udis86)
 fi
 
 # Download dependencies
@@ -75,6 +78,13 @@ if [ ! -f "aquamarine-${AQUAMARINE_VER}.tar.gz" ]; then
     echo "Downloading aquamarine..."
     curl -L -o "aquamarine-${AQUAMARINE_VER}.tar.gz" \
          "https://github.com/hyprwm/aquamarine/archive/refs/tags/v${AQUAMARINE_VER}.tar.gz"
+fi
+
+# glaze: for hyprpm (mock chroot has no network for FetchContent)
+if [ ! -f "glaze-${GLAZE_VER}.tar.gz" ]; then
+    echo "Downloading glaze..."
+    curl -L -o "glaze-${GLAZE_VER}.tar.gz" \
+         "https://github.com/stephenberry/glaze/archive/refs/tags/v${GLAZE_VER}.tar.gz"
 fi
 
 cd ..

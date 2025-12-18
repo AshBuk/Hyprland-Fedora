@@ -1,6 +1,6 @@
 Name:           hyprland
 Version:        0.52.2
-Release:        2%{?dist}
+Release:        1%{?dist}
 Summary:        Dynamic tiling Wayland compositor
 License:        BSD-3-Clause
 URL:            https://github.com/hyprwm/Hyprland
@@ -24,9 +24,6 @@ Source25:       https://github.com/hyprwm/aquamarine/archive/refs/tags/v0.10.0.t
 # glaze JSON library (for hyprpm, mock chroot has no network for FetchContent)
 # Using our release mirror to ensure availability
 Source30:       https://github.com/AshBuk/Hyprland-Fedora/releases/download/v0.52.2-fedora/glaze-5.1.1.tar.gz
-
-# xdg-desktop-portal-hyprland (screen sharing portal)
-Source40:       https://github.com/hyprwm/xdg-desktop-portal-hyprland/archive/refs/tags/v1.3.11.tar.gz#/xdg-desktop-portal-hyprland-1.3.11.tar.gz
 
 # Build dependencies
 BuildRequires:  cmake
@@ -84,11 +81,6 @@ BuildRequires:  libXfont2-devel
 BuildRequires:  xkeyboard-config
 BuildRequires:  glib2-devel
 BuildRequires:  libuuid-devel
-# xdg-desktop-portal-hyprland deps
-BuildRequires:  pipewire-devel
-BuildRequires:  sdbus-cpp-devel
-BuildRequires:  qt6-qtbase-devel
-BuildRequires:  qt6-qtwayland-devel
 
 # Runtime deps (system)
 Requires:       cairo
@@ -121,12 +113,6 @@ Requires:       xcb-util-image
 Requires:       xcb-util-renderutil
 Requires:       xcb-util-wm
 Requires:       xorg-x11-server-Xwayland
-# Portal runtime deps
-Requires:       pipewire
-Requires:       sdbus-cpp
-Requires:       qt6-qtbase
-Requires:       qt6-qtwayland
-Requires:       xdg-desktop-portal
 
 %description
 Hyprland is a dynamic tiling Wayland compositor with modern Wayland features,
@@ -156,9 +142,6 @@ tar -xzf %{SOURCE25}
 
 # Unpack glaze (for hyprpm, mock chroot has no network for FetchContent)
 tar -xzf %{SOURCE30}
-
-# Unpack xdg-desktop-portal-hyprland
-tar -xzf %{SOURCE40}
 
 %build
 # hwdata.pc for pkg-config consumers
@@ -280,17 +263,6 @@ cmake -B build \
   -DOPENGL_INCLUDE_DIR=/usr/include
 cmake --build build --parallel %{_smp_build_ncpus}
 
-# 9) xdg-desktop-portal-hyprland
-# Needs hyprland-protocols and hyprwayland-scanner from vendor prefix
-pushd xdg-desktop-portal-hyprland-1.3.11
-cmake -B build -DCMAKE_BUILD_TYPE=Release \
-  -DCMAKE_INSTALL_PREFIX=%{_prefix} \
-  -DCMAKE_PREFIX_PATH="$VENDOR_PREFIX" \
-  -Dhyprwayland-scanner_DIR="$VENDOR_PREFIX/lib64/cmake/hyprwayland-scanner" \
-  -DCMAKE_CXX_FLAGS="$GCC15_CXXFLAGS"
-cmake --build build --parallel %{_smp_build_ncpus}
-popd
-
 %install
 VENDOR_PREFIX="$(pwd)/vendor"
 
@@ -299,11 +271,6 @@ DESTDIR=%{buildroot} cmake --install build
 
 # Ensure "hyprland" alias exists (some setups expect it)
 ln -sf Hyprland %{buildroot}%{_bindir}/hyprland
-
-# Install xdg-desktop-portal-hyprland
-pushd xdg-desktop-portal-hyprland-1.3.11
-DESTDIR=%{buildroot} cmake --install build
-popd
 
 # Ensure session desktop entry exists
 install -d %{buildroot}%{_datadir}/wayland-sessions
@@ -366,17 +333,8 @@ rm -rf %{buildroot}%{_datadir}/glaze
 %{_datadir}/fish/vendor_completions.d/hyprpm.fish
 %{_datadir}/zsh/site-functions/_hyprctl
 %{_datadir}/zsh/site-functions/_hyprpm
-# xdg-desktop-portal-hyprland
-%{_libexecdir}/xdg-desktop-portal-hyprland
-%{_bindir}/hyprland-share-picker
-%{_datadir}/xdg-desktop-portal/portals/hyprland.portal
-%{_datadir}/dbus-1/services/org.freedesktop.impl.portal.desktop.hyprland.service
-%{_userunitdir}/xdg-desktop-portal-hyprland.service
 
 %changelog
-* Thu Dec 18 2025 Asher Buk <asherbuk@example.com> - 0.52.2-2
-- Added xdg-desktop-portal-hyprland 1.3.11 for screen sharing support
-
 * Mon Dec 15 2025 Asher Buk <asherbuk@example.com> - 0.52.2-1
 - Single-package COPR build for Fedora 43
 - Pinned Hyprland deps built from fixed-version sources

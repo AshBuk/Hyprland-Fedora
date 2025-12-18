@@ -1,6 +1,6 @@
 Name:           hyprland
 Version:        0.52.2
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Dynamic tiling Wayland compositor
 License:        BSD-3-Clause
 URL:            https://github.com/hyprwm/Hyprland
@@ -32,7 +32,6 @@ BuildRequires:  git
 BuildRequires:  meson
 BuildRequires:  ninja-build
 BuildRequires:  pkgconf-pkg-config
-BuildRequires:  patchelf
 BuildRequires:  python3
 
 # Library dependencies (system)
@@ -247,6 +246,8 @@ popd
 # 8) Hyprland (needs -fpermissive for generated protocol code with zero-size arrays)
 # Use local glaze source (mock chroot has no network for FetchContent)
 # Disable BUILD_TESTING to skip hyprtester (its plugin Makefile doesn't support vendored deps)
+# Set RPATH at build time to avoid patchelf corruption issues
+VENDOR_RPATH='$ORIGIN/../libexec/hyprland/vendor/lib64:$ORIGIN/../libexec/hyprland/vendor/lib'
 cmake -B build \
   -DCMAKE_BUILD_TYPE=Release \
   -DCMAKE_INSTALL_PREFIX=%{_prefix} \
@@ -255,6 +256,8 @@ cmake -B build \
   -DCMAKE_CXX_FLAGS="$GCC15_CXXFLAGS" \
   -DFETCHCONTENT_SOURCE_DIR_GLAZE="$(pwd)/glaze-5.1.1" \
   -DBUILD_TESTING=OFF \
+  -DCMAKE_INSTALL_RPATH="$VENDOR_RPATH" \
+  -DCMAKE_BUILD_WITH_INSTALL_RPATH=ON \
   -DOPENGL_opengl_LIBRARY=%{_libdir}/libOpenGL.so \
   -DOPENGL_gles3_LIBRARY=%{_libdir}/libGLESv2.so \
   -DOPENGL_GLES3_INCLUDE_DIR=/usr/include \
@@ -291,11 +294,12 @@ install -d "$VENDOR_DST/lib64" "$VENDOR_DST/lib"
 cp -a "$VENDOR_PREFIX"/lib64/lib*.so* "$VENDOR_DST/lib64/" 2>/dev/null || true
 cp -a "$VENDOR_PREFIX"/lib/lib*.so*   "$VENDOR_DST/lib/"   2>/dev/null || true
 
-# Set RPATH on binaries to use vendored libs
-RPATH='$ORIGIN/../libexec/hyprland/vendor/lib64:$ORIGIN/../libexec/hyprland/vendor/lib'
+# Verify RPATH is set correctly (was set at build time via CMAKE_INSTALL_RPATH)
+# Using patchelf post-install can corrupt ELF program headers, so we set RPATH at build time
+echo "Verifying RPATH on installed binaries:"
 for bin in %{buildroot}%{_bindir}/Hyprland %{buildroot}%{_bindir}/hyprctl %{buildroot}%{_bindir}/hyprpm; do
   [ -x "$bin" ] || continue
-  patchelf --set-rpath "$RPATH" "$bin"
+  echo "  $(basename $bin): $(readelf -d "$bin" 2>/dev/null | grep -E 'RPATH|RUNPATH' || echo 'no RPATH set')"
 done
 
 # Remove glaze files (header-only library, not needed at runtime)
@@ -335,6 +339,11 @@ rm -rf %{buildroot}%{_datadir}/glaze
 %{_datadir}/zsh/site-functions/_hyprpm
 
 %changelog
+* Thu Dec 18 2025 Asher Buk <asherbuk@example.com> - 0.52.2-2
+- Fix ELF corruption: set RPATH at build time via CMAKE_INSTALL_RPATH
+- Remove patchelf post-install which was corrupting ELF program headers
+- Binaries are now properly dynamically linked
+
 * Mon Dec 15 2025 Asher Buk <asherbuk@example.com> - 0.52.2-1
 - Single-package COPR build for Fedora 43
 - Pinned Hyprland deps built from fixed-version sources

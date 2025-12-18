@@ -1,4 +1,8 @@
 #!/bin/bash
+# Copyright (c) 2025 Asher Buk
+# SPDX-License-Identifier: MIT
+# https://copr.fedorainfracloud.org/coprs/ashbuk/Hyprland-Fedora/
+#
 # Build Hyprland RPM for Fedora 43 (includes xdg-desktop-portal-hyprland)
 set -e
 

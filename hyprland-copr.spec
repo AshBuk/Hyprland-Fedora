@@ -89,8 +89,6 @@ BuildRequires:  pipewire-devel
 BuildRequires:  sdbus-cpp-devel
 BuildRequires:  qt6-qtbase-devel
 BuildRequires:  qt6-qtwayland-devel
-BuildRequires:  libdrm-devel
-BuildRequires:  gbm-devel
 
 # Runtime deps (system)
 Requires:       cairo

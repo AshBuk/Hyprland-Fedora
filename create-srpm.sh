@@ -3,7 +3,7 @@
 set -e
 
 VERSION="0.52.2"
-RELEASE="1"
+RELEASE="2"
 
 # Dependency versions (must match spec file)
 HYPRLAND_PROTOCOLS_VER="0.6.4"
@@ -14,6 +14,7 @@ HYPRCURSOR_VER="0.1.13"
 HYPRGRAPHICS_VER="0.4.0"
 AQUAMARINE_VER="0.10.0"
 GLAZE_VER="5.1.1"
+XDPH_VER="1.3.11"
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(dirname "$SCRIPT_DIR")"
@@ -85,6 +86,13 @@ if [ ! -f "glaze-${GLAZE_VER}.tar.gz" ]; then
     echo "Downloading glaze..."
     curl -L -o "glaze-${GLAZE_VER}.tar.gz" \
          "https://github.com/stephenberry/glaze/archive/refs/tags/v${GLAZE_VER}.tar.gz"
+fi
+
+# xdg-desktop-portal-hyprland
+if [ ! -f "xdg-desktop-portal-hyprland-${XDPH_VER}.tar.gz" ]; then
+    echo "Downloading xdg-desktop-portal-hyprland..."
+    curl -L -o "xdg-desktop-portal-hyprland-${XDPH_VER}.tar.gz" \
+         "https://github.com/hyprwm/xdg-desktop-portal-hyprland/archive/refs/tags/v${XDPH_VER}.tar.gz"
 fi
 
 cd ..

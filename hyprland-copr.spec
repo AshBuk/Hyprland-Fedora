@@ -298,19 +298,41 @@ for bin in %{buildroot}%{_bindir}/Hyprland %{buildroot}%{_bindir}/hyprctl %{buil
   patchelf --set-rpath "$RPATH" "$bin"
 done
 
+# Remove glaze files (header-only library, not needed at runtime)
+rm -rf %{buildroot}%{_includedir}/glaze
+rm -rf %{buildroot}%{_datadir}/glaze
+
 %files
 %license LICENSE
 %doc README.md
+# Binaries
 %{_bindir}/Hyprland
 %{_bindir}/hyprland
 %{_bindir}/hyprctl
 %{_bindir}/hyprpm
+# Vendored libraries
 %dir %{_libexecdir}/%{name}
 %{_libexecdir}/%{name}/vendor/
+# Desktop entries
 %{_datadir}/wayland-sessions/hyprland.desktop
+%{_datadir}/wayland-sessions/hyprland-uwsm.desktop
+# Data files
 %{_datadir}/hypr/
 %{_datadir}/xdg-desktop-portal/hyprland-portals.conf
+# Development headers
 %{_includedir}/hyprland/
+# pkg-config
+%{_datadir}/pkgconfig/hyprland.pc
+# Man pages
+%{_mandir}/man1/Hyprland.1*
+%{_mandir}/man1/hyprctl.1*
+# Shell completions
+%{_datadir}/bash-completion/completions/hyprctl
+%{_datadir}/bash-completion/completions/hyprpm
+%{_datadir}/fish/vendor_completions.d/hyprctl.fish
+%{_datadir}/fish/vendor_completions.d/hyprpm.fish
+%{_datadir}/zsh/site-functions/_hyprctl
+%{_datadir}/zsh/site-functions/_hyprpm
 
 %changelog
 * Mon Dec 15 2025 Asher Buk <asherbuk@example.com> - 0.52.2-1

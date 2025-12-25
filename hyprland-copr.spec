@@ -346,12 +346,12 @@ rm -rf %{buildroot}%{_datadir}/glaze
 %{_datadir}/zsh/site-functions/_hyprpm
 
 %changelog
-* Thu Dec 18 2025 Asher Buk <asherbuk@example.com> - 0.52.2-2
+* Thu Dec 18 2025 Asher Buk <AshBuk@users.noreply.github.com> - 0.52.2-2
 - Fix ELF corruption: set RPATH at build time via CMAKE_INSTALL_RPATH
 - Remove patchelf post-install which was corrupting ELF program headers
 - Binaries are now properly dynamically linked
 
-* Mon Dec 15 2025 Asher Buk <asherbuk@example.com> - 0.52.2-1
+* Mon Dec 15 2025 Asher Buk <AshBuk@users.noreply.github.com> - 0.52.2-1
 - Single-package COPR build for Fedora 43
 - Pinned Hyprland deps built from fixed-version sources
 - Vendored runtime libs in /usr/libexec to avoid system library conflicts

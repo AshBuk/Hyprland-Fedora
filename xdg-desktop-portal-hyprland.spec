@@ -26,6 +26,7 @@ BuildRequires:  meson
 BuildRequires:  ninja-build
 BuildRequires:  pkgconf-pkg-config
 BuildRequires:  pugixml-devel
+BuildRequires:  pixman-devel
 
 # Portal dependencies
 BuildRequires:  pipewire-devel >= 1.1.82

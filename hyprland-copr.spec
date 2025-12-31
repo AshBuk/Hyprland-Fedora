@@ -2,9 +2,13 @@
 # SPDX-License-Identifier: MIT
 # https://copr.fedorainfracloud.org/coprs/ashbuk/Hyprland-Fedora/
 
+# Exclude auto-requires for vendored Hyprland libraries
+# These are built from source and installed in /usr/libexec/hyprland/vendor/
+%global __requires_exclude pkgconfig\\((aquamarine|hyprutils|hyprlang|hyprcursor|hyprgraphics|hyprwayland-scanner|hyprland-protocols|hyprwire)\\)
+
 Name:           hyprland
 Version:        0.53.0
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        Dynamic tiling Wayland compositor
 License:        BSD-3-Clause
 URL:            https://github.com/hyprwm/Hyprland
@@ -382,6 +386,10 @@ rm -rf %{buildroot}%{_datadir}/glaze
 %{_datadir}/zsh/site-functions/_hyprpm
 
 %changelog
+* Wed Dec 31 2025 Asher Buk <AshBuk@users.noreply.github.com> - 0.53.0-3
+- Exclude auto-requires for vendored Hyprland libraries (aquamarine, hyprutils, etc.)
+- Fixes "nothing provides pkgconfig(...)" errors during upgrade
+
 * Wed Dec 31 2025 Asher Buk <AshBuk@users.noreply.github.com> - 0.53.0-2
 - Fix muparser package name (muparser -> muParser) for Fedora
 

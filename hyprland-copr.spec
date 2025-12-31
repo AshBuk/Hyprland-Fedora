@@ -4,7 +4,7 @@
 
 Name:           hyprland
 Version:        0.53.0
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Dynamic tiling Wayland compositor
 License:        BSD-3-Clause
 URL:            https://github.com/hyprwm/Hyprland
@@ -88,6 +88,8 @@ BuildRequires:  glib2-devel
 BuildRequires:  libuuid-devel
 # NEW: libffi for hyprwire
 BuildRequires:  libffi-devel
+# NEW: muparser for math expressions in config (0.53.0)
+BuildRequires:  muparser-devel
 
 # Runtime deps (system)
 Requires:       cairo
@@ -122,6 +124,8 @@ Requires:       xcb-util-wm
 Requires:       xorg-x11-server-Xwayland
 # NEW: libffi for hyprwire runtime
 Requires:       libffi
+# NEW: muparser for math expressions in config (0.53.0)
+Requires:       muparser
 
 %description
 Hyprland is a dynamic tiling Wayland compositor with modern Wayland features,
@@ -378,6 +382,9 @@ rm -rf %{buildroot}%{_datadir}/glaze
 %{_datadir}/zsh/site-functions/_hyprpm
 
 %changelog
+* Wed Dec 31 2025 Asher Buk <AshBuk@users.noreply.github.com> - 0.53.0-2
+- Add missing muparser dependency (math expressions in config)
+
 * Wed Dec 31 2025 Asher Buk <AshBuk@users.noreply.github.com> - 0.53.0-1
 - Update to Hyprland 0.53.0
 - BREAKING: Window rules syntax completely reworked (see https://hypr.land/news/update53/)

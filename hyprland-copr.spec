@@ -89,7 +89,7 @@ BuildRequires:  libuuid-devel
 # NEW: libffi for hyprwire
 BuildRequires:  libffi-devel
 # NEW: muparser for math expressions in config (0.53.0)
-BuildRequires:  muparser-devel
+BuildRequires:  muParser-devel
 
 # Runtime deps (system)
 Requires:       cairo
@@ -125,7 +125,7 @@ Requires:       xorg-x11-server-Xwayland
 # NEW: libffi for hyprwire runtime
 Requires:       libffi
 # NEW: muparser for math expressions in config (0.53.0)
-Requires:       muparser
+Requires:       muParser
 
 %description
 Hyprland is a dynamic tiling Wayland compositor with modern Wayland features,
@@ -383,7 +383,7 @@ rm -rf %{buildroot}%{_datadir}/glaze
 
 %changelog
 * Wed Dec 31 2025 Asher Buk <AshBuk@users.noreply.github.com> - 0.53.0-2
-- Add missing muparser dependency (math expressions in config)
+- Fix muparser package name (muparser -> muParser) for Fedora
 
 * Wed Dec 31 2025 Asher Buk <AshBuk@users.noreply.github.com> - 0.53.0-1
 - Update to Hyprland 0.53.0

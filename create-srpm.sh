@@ -6,18 +6,19 @@
 # Create SRPM for COPR submission
 set -e
 
-VERSION="0.52.2"
+VERSION="0.53.0"
 RELEASE="1"
 
 # Dependency versions (must match spec file)
-HYPRLAND_PROTOCOLS_VER="0.6.4"
+HYPRLAND_PROTOCOLS_VER="0.7.0"
 HYPRWAYLAND_SCANNER_VER="0.4.5"
 HYPRUTILS_VER="0.11.0"
 HYPRLANG_VER="0.6.7"
 HYPRCURSOR_VER="0.1.13"
-HYPRGRAPHICS_VER="0.4.0"
+HYPRGRAPHICS_VER="0.5.0"
 AQUAMARINE_VER="0.10.0"
-GLAZE_VER="5.1.1"
+HYPRWIRE_VER="0.2.1"
+GLAZE_VER="6.4.1"
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(dirname "$SCRIPT_DIR")"
@@ -82,6 +83,13 @@ if [ ! -f "aquamarine-${AQUAMARINE_VER}.tar.gz" ]; then
     echo "Downloading aquamarine..."
     curl -L -o "aquamarine-${AQUAMARINE_VER}.tar.gz" \
          "https://github.com/hyprwm/aquamarine/archive/refs/tags/v${AQUAMARINE_VER}.tar.gz"
+fi
+
+# NEW: hyprwire IPC library
+if [ ! -f "hyprwire-${HYPRWIRE_VER}.tar.gz" ]; then
+    echo "Downloading hyprwire..."
+    curl -L -o "hyprwire-${HYPRWIRE_VER}.tar.gz" \
+         "https://github.com/hyprwm/hyprwire/archive/refs/tags/v${HYPRWIRE_VER}.tar.gz"
 fi
 
 # glaze: for hyprpm (mock chroot has no network for FetchContent)

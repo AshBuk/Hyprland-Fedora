@@ -4,7 +4,7 @@
 
 Name:           xdg-desktop-portal-hyprland
 Version:        1.3.11
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        XDG Desktop Portal backend for Hyprland
 License:        BSD-3-Clause
 URL:            https://github.com/hyprwm/xdg-desktop-portal-hyprland
@@ -12,12 +12,12 @@ URL:            https://github.com/hyprwm/xdg-desktop-portal-hyprland
 # Main source
 Source0:        https://github.com/hyprwm/xdg-desktop-portal-hyprland/archive/refs/tags/v%{version}.tar.gz#/%{name}-%{version}.tar.gz
 
-# Vendored Hyprland libs (same versions as hyprland package)
+# Vendored Hyprland libs (same versions as hyprland 0.53.0 package)
 # These are needed at build time and will be linked via RUNPATH
 Source10:       https://github.com/hyprwm/hyprwayland-scanner/archive/refs/tags/v0.4.5.tar.gz#/hyprwayland-scanner-0.4.5.tar.gz
 Source11:       https://github.com/hyprwm/hyprutils/archive/refs/tags/v0.11.0.tar.gz#/hyprutils-0.11.0.tar.gz
 Source12:       https://github.com/hyprwm/hyprlang/archive/refs/tags/v0.6.7.tar.gz#/hyprlang-0.6.7.tar.gz
-Source13:       https://github.com/hyprwm/hyprland-protocols/archive/refs/tags/v0.6.4.tar.gz#/hyprland-protocols-0.6.4.tar.gz
+Source13:       https://github.com/hyprwm/hyprland-protocols/archive/refs/tags/v0.7.0.tar.gz#/hyprland-protocols-0.7.0.tar.gz
 
 # Build dependencies
 BuildRequires:  cmake
@@ -41,7 +41,7 @@ BuildRequires:  qt6-qtbase-devel
 BuildRequires:  qt6-qtwayland-devel
 
 # Runtime deps
-Requires:       hyprland
+Requires:       hyprland >= 0.53.0
 Requires:       xdg-desktop-portal
 Requires:       pipewire >= 1.1.82
 
@@ -95,7 +95,7 @@ cmake --install build
 popd
 
 # 4) hyprland-protocols
-pushd hyprland-protocols-0.6.4
+pushd hyprland-protocols-0.7.0
 meson setup build --prefix="$VENDOR_PREFIX"
 ninja -C build
 ninja -C build install
@@ -139,6 +139,11 @@ done
 %{_userunitdir}/xdg-desktop-portal-hyprland.service
 
 %changelog
+* Wed Dec 31 2025 Asher Buk <AshBuk@users.noreply.github.com> - 1.3.11-2
+- Rebuild for Hyprland 0.53.0 compatibility
+- Update hyprland-protocols 0.6.4 -> 0.7.0
+- Require hyprland >= 0.53.0
+
 * Thu Dec 25 2025 Asher Buk <AshBuk@users.noreply.github.com> - 1.3.11-1
 - Initial package for Fedora 43 COPR
 - Built with RUNPATH pointing to hyprland vendor libs

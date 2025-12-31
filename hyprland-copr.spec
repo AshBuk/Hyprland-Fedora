@@ -3,8 +3,8 @@
 # https://copr.fedorainfracloud.org/coprs/ashbuk/Hyprland-Fedora/
 
 Name:           hyprland
-Version:        0.52.2
-Release:        2%{?dist}
+Version:        0.53.0
+Release:        1%{?dist}
 Summary:        Dynamic tiling Wayland compositor
 License:        BSD-3-Clause
 URL:            https://github.com/hyprwm/Hyprland
@@ -13,21 +13,23 @@ URL:            https://github.com/hyprwm/Hyprland
 Source0:        https://github.com/hyprwm/Hyprland/archive/refs/tags/v%{version}.tar.gz#/%{name}-%{version}.tar.gz
 
 # Git submodules (not included in GitHub tarball)
-Source10:       https://github.com/hyprwm/hyprland-protocols/archive/refs/tags/v0.6.4.tar.gz#/hyprland-protocols-0.6.4.tar.gz
+Source10:       https://github.com/hyprwm/hyprland-protocols/archive/refs/tags/v0.7.0.tar.gz#/hyprland-protocols-0.7.0.tar.gz
 # udis86 from Hyprland subprojects (patched for Python 3.x, with CMakeLists.txt)
-Source11:       https://github.com/AshBuk/Hyprland-Fedora/releases/download/v0.52.2-fedora/udis86-hyprland.tar.gz
+Source11:       https://github.com/AshBuk/Hyprland-Fedora/releases/download/v0.53.0-fedora/udis86-hyprland.tar.gz
 
 # Hyprland pinned deps (vendored, fixed versions)
 Source20:       https://github.com/hyprwm/hyprwayland-scanner/archive/refs/tags/v0.4.5.tar.gz#/hyprwayland-scanner-0.4.5.tar.gz
 Source21:       https://github.com/hyprwm/hyprutils/archive/refs/tags/v0.11.0.tar.gz#/hyprutils-0.11.0.tar.gz
 Source22:       https://github.com/hyprwm/hyprlang/archive/refs/tags/v0.6.7.tar.gz#/hyprlang-0.6.7.tar.gz
 Source23:       https://github.com/hyprwm/hyprcursor/archive/refs/tags/v0.1.13.tar.gz#/hyprcursor-0.1.13.tar.gz
-Source24:       https://github.com/hyprwm/hyprgraphics/archive/refs/tags/v0.4.0.tar.gz#/hyprgraphics-0.4.0.tar.gz
+Source24:       https://github.com/hyprwm/hyprgraphics/archive/refs/tags/v0.5.0.tar.gz#/hyprgraphics-0.5.0.tar.gz
 Source25:       https://github.com/hyprwm/aquamarine/archive/refs/tags/v0.10.0.tar.gz#/aquamarine-0.10.0.tar.gz
+# NEW: hyprwire IPC library (includes hyprwire-scanner for hyprctl)
+Source26:       https://github.com/hyprwm/hyprwire/archive/refs/tags/v0.2.1.tar.gz#/hyprwire-0.2.1.tar.gz
 
 # glaze JSON library (for hyprpm, mock chroot has no network for FetchContent)
 # Using our release mirror to ensure availability
-Source30:       https://github.com/AshBuk/Hyprland-Fedora/releases/download/v0.52.2-fedora/glaze-5.1.1.tar.gz
+Source30:       https://github.com/AshBuk/Hyprland-Fedora/releases/download/v0.53.0-fedora/glaze-6.4.1.tar.gz
 
 # Build dependencies
 BuildRequires:  cmake
@@ -84,6 +86,8 @@ BuildRequires:  libXfont2-devel
 BuildRequires:  xkeyboard-config
 BuildRequires:  glib2-devel
 BuildRequires:  libuuid-devel
+# NEW: libffi for hyprwire
+BuildRequires:  libffi-devel
 
 # Runtime deps (system)
 Requires:       cairo
@@ -116,6 +120,8 @@ Requires:       xcb-util-image
 Requires:       xcb-util-renderutil
 Requires:       xcb-util-wm
 Requires:       xorg-x11-server-Xwayland
+# NEW: libffi for hyprwire runtime
+Requires:       libffi
 
 %description
 Hyprland is a dynamic tiling Wayland compositor with modern Wayland features,
@@ -125,13 +131,16 @@ This is a single-package COPR build for Fedora 43.
 Pinned Hyprland dependencies are built from fixed-version sources and installed
 into a private vendor prefix to avoid polluting system /usr/lib64.
 
+Note: Version 0.53.0 includes breaking changes in window rules syntax.
+Please review https://hypr.land/news/update53/ before upgrading.
+
 %prep
 %autosetup -n Hyprland-%{version}
 
 # Unpack submodules into correct locations
 rm -rf subprojects/hyprland-protocols subprojects/udis86
 tar -xzf %{SOURCE10} -C subprojects
-mv subprojects/hyprland-protocols-0.6.4 subprojects/hyprland-protocols
+mv subprojects/hyprland-protocols-0.7.0 subprojects/hyprland-protocols
 # udis86 from Hyprland subprojects (patched for Python 3.x, includes CMakeLists.txt)
 tar -xzf %{SOURCE11} -C subprojects
 
@@ -142,6 +151,7 @@ tar -xzf %{SOURCE22}
 tar -xzf %{SOURCE23}
 tar -xzf %{SOURCE24}
 tar -xzf %{SOURCE25}
+tar -xzf %{SOURCE26}
 
 # Unpack glaze (for hyprpm, mock chroot has no network for FetchContent)
 tar -xzf %{SOURCE30}
@@ -214,7 +224,7 @@ cmake --install build
 popd
 
 # 5) hyprgraphics
-pushd hyprgraphics-0.4.0
+pushd hyprgraphics-0.5.0
 cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$VENDOR_PREFIX" \
   -DCMAKE_PREFIX_PATH="$VENDOR_PREFIX" -DCMAKE_INSTALL_LIBDIR=lib64
 cmake --build build --parallel %{_smp_build_ncpus}
@@ -240,14 +250,22 @@ cmake --build build --parallel %{_smp_build_ncpus}
 cmake --install build
 popd
 
-# 7) hyprland-protocols
+# 7) hyprwire (NEW: IPC library + scanner for hyprctl)
+pushd hyprwire-0.2.1
+cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$VENDOR_PREFIX" \
+  -DCMAKE_PREFIX_PATH="$VENDOR_PREFIX" -DCMAKE_INSTALL_LIBDIR=lib64
+cmake --build build --parallel %{_smp_build_ncpus}
+cmake --install build
+popd
+
+# 8) hyprland-protocols
 pushd subprojects/hyprland-protocols
 meson setup build --prefix="$VENDOR_PREFIX"
 ninja -C build
 ninja -C build install
 popd
 
-# 8) Hyprland (needs -fpermissive for generated protocol code with zero-size arrays)
+# 9) Hyprland (needs -fpermissive for generated protocol code with zero-size arrays)
 # Use local glaze source (mock chroot has no network for FetchContent)
 # Disable BUILD_TESTING to skip hyprtester (its plugin Makefile doesn't support vendored deps)
 # Set RPATH at build time to avoid patchelf corruption issues
@@ -258,7 +276,7 @@ cmake -B build \
   -DCMAKE_PREFIX_PATH="$VENDOR_PREFIX" \
   -Dhyprwayland-scanner_DIR="$VENDOR_PREFIX/lib64/cmake/hyprwayland-scanner" \
   -DCMAKE_CXX_FLAGS="$GCC15_CXXFLAGS" \
-  -DFETCHCONTENT_SOURCE_DIR_GLAZE="$(pwd)/glaze-5.1.1" \
+  -DFETCHCONTENT_SOURCE_DIR_GLAZE="$(pwd)/glaze-6.4.1" \
   -DBUILD_TESTING=OFF \
   -DCMAKE_INSTALL_RPATH="$VENDOR_RPATH" \
   -DCMAKE_BUILD_WITH_INSTALL_RPATH=ON \
@@ -270,6 +288,15 @@ cmake -B build \
   -DOPENGL_INCLUDE_DIR=/usr/include
 cmake --build build --parallel %{_smp_build_ncpus}
 
+# 10) start-hyprland (NEW: watchdog/crash recovery binary)
+pushd start
+cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=%{_prefix} \
+  -DCMAKE_PREFIX_PATH="$VENDOR_PREFIX" \
+  -DCMAKE_INSTALL_RPATH="$VENDOR_RPATH" \
+  -DCMAKE_BUILD_WITH_INSTALL_RPATH=ON
+cmake --build build --parallel %{_smp_build_ncpus}
+popd
+
 %check
 # Tests disabled: hyprtester doesn't support vendored deps
 
@@ -278,6 +305,9 @@ VENDOR_PREFIX="$(pwd)/vendor"
 
 # Install Hyprland binaries/data
 DESTDIR=%{buildroot} cmake --install build
+
+# Install start-hyprland
+DESTDIR=%{buildroot} cmake --install start/build
 
 # Ensure "hyprland" alias exists (some setups expect it)
 ln -sf Hyprland %{buildroot}%{_bindir}/hyprland
@@ -304,7 +334,7 @@ cp -a "$VENDOR_PREFIX"/lib/lib*.so*   "$VENDOR_DST/lib/"   2>/dev/null || true
 # Verify RPATH is set correctly (was set at build time via CMAKE_INSTALL_RPATH)
 # Using patchelf post-install can corrupt ELF program headers, so we set RPATH at build time
 echo "Verifying RPATH on installed binaries:"
-for bin in %{buildroot}%{_bindir}/Hyprland %{buildroot}%{_bindir}/hyprctl %{buildroot}%{_bindir}/hyprpm; do
+for bin in %{buildroot}%{_bindir}/Hyprland %{buildroot}%{_bindir}/hyprctl %{buildroot}%{_bindir}/hyprpm %{buildroot}%{_bindir}/start-hyprland; do
   [ -x "$bin" ] || continue
   echo "  $(basename $bin): $(readelf -d "$bin" 2>/dev/null | grep -E 'RPATH|RUNPATH' || echo 'no RPATH set')"
 done
@@ -321,6 +351,8 @@ rm -rf %{buildroot}%{_datadir}/glaze
 %{_bindir}/hyprland
 %{_bindir}/hyprctl
 %{_bindir}/hyprpm
+# NEW: start-hyprland watchdog binary
+%{_bindir}/start-hyprland
 # Vendored libraries
 %dir %{_libexecdir}/%{name}
 %{_libexecdir}/%{name}/vendor/
@@ -346,6 +378,16 @@ rm -rf %{buildroot}%{_datadir}/glaze
 %{_datadir}/zsh/site-functions/_hyprpm
 
 %changelog
+* Wed Dec 31 2025 Asher Buk <AshBuk@users.noreply.github.com> - 0.53.0-1
+- Update to Hyprland 0.53.0
+- BREAKING: Window rules syntax completely reworked (see https://hypr.land/news/update53/)
+- NEW: start-hyprland watchdog binary for crash recovery and safe mode
+- NEW: hyprwire IPC library (v0.2.1) for improved hyprctl communication
+- Update hyprland-protocols 0.6.4 -> 0.7.0
+- Update hyprgraphics 0.4.0 -> 0.5.0
+- Update glaze 5.1.1 -> 6.4.1
+- Add libffi dependency for hyprwire
+
 * Thu Dec 18 2025 Asher Buk <AshBuk@users.noreply.github.com> - 0.52.2-2
 - Fix ELF corruption: set RPATH at build time via CMAKE_INSTALL_RPATH
 - Remove patchelf post-install which was corrupting ELF program headers

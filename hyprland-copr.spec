@@ -16,6 +16,9 @@
 %global hyprwire_ver            0.2.1
 %global glaze_ver               6.4.1
 
+# Build assets release (udis86, glaze tarballs - only changes when these deps update)
+%global build_assets_release    v0.53-fedora
+
 # Exclude auto-requires for vendored Hyprland libraries
 # These are built from source and installed in /usr/libexec/hyprland/vendor/
 %global __requires_exclude pkgconfig\\((aquamarine|hyprutils|hyprlang|hyprcursor|hyprgraphics|hyprwayland-scanner|hyprland-protocols|hyprwire)\\)
@@ -33,7 +36,7 @@ Source0:        https://github.com/hyprwm/Hyprland/archive/refs/tags/v%{version}
 # Git submodules (not included in GitHub tarball)
 Source10:       https://github.com/hyprwm/hyprland-protocols/archive/refs/tags/v%{hyprland_protocols_ver}.tar.gz#/hyprland-protocols-%{hyprland_protocols_ver}.tar.gz
 # udis86 from Hyprland subprojects (patched for Python 3.x, with CMakeLists.txt)
-Source11:       https://github.com/AshBuk/Hyprland-Fedora/releases/download/v%{version}-fedora/udis86-hyprland.tar.gz
+Source11:       https://github.com/AshBuk/Hyprland-Fedora/releases/download/%{build_assets_release}/udis86-hyprland.tar.gz
 
 # Hyprland pinned deps (vendored, fixed versions)
 Source20:       https://github.com/hyprwm/hyprwayland-scanner/archive/refs/tags/v%{hyprwayland_scanner_ver}.tar.gz#/hyprwayland-scanner-%{hyprwayland_scanner_ver}.tar.gz
@@ -47,7 +50,7 @@ Source26:       https://github.com/hyprwm/hyprwire/archive/refs/tags/v%{hyprwire
 
 # glaze JSON library (for hyprpm, mock chroot has no network for FetchContent)
 # Using our release mirror to ensure availability
-Source30:       https://github.com/AshBuk/Hyprland-Fedora/releases/download/v%{version}-fedora/glaze-%{glaze_ver}.tar.gz
+Source30:       https://github.com/AshBuk/Hyprland-Fedora/releases/download/%{build_assets_release}/glaze-%{glaze_ver}.tar.gz
 
 # Build dependencies
 BuildRequires:  cmake

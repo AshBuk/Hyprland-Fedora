@@ -46,7 +46,7 @@ sudo dnf remove hyprland xdg-desktop-portal-hyprland
 sudo dnf copr disable ashbuk/Hyprland-Fedora
 ```
 
-<img width="2240" height="1400" alt="hypr-f43" src="https://github.com/user-attachments/assets/6fad5b0a-1be1-4d72-8231-8a6ee03aff5c" />
+![hyprland-fedora](https://github.com/user-attachments/assets/d6ddaaaa-4964-4804-a2f5-5d9c1f816c6b)
 
 ### What's Included
 

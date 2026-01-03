@@ -1,22 +1,22 @@
 # Copyright (c) 2025 Asher Buk
 # SPDX-License-Identifier: MIT
 #
-# Run rpmlint on spec files for every PR to fedora-43-build
+# Run rpmlint on spec files
 
 name: RPM Lint
 
 on:
   pull_request:
     branches:
-      - fedora-43-build
+      - main
     paths:
-      - 'fedora-build/*.spec'
+      - '*.spec'
       - '.github/workflows/lint.yml'
   push:
     branches:
-      - fedora-43-build
+      - main
     paths:
-      - 'fedora-build/*.spec'
+      - '*.spec'
   workflow_dispatch:
 
 jobs:
@@ -35,7 +35,6 @@ jobs:
           dnf install -y rpmlint
 
       - name: Run rpmlint
-        working-directory: fedora-build
         run: |
           echo "=== Running rpmlint on spec files ==="
           rpmlint *.spec

@@ -65,10 +65,7 @@ libaquamarine, libhyprlang, libhyprutils, libhyprcursor, libhyprgraphics, libhyp
 - RPATH set at build time via CMake (not patchelf — avoids ELF corruption)
 - System libraries (wayland, mesa, libinput) from Fedora repos
 
-## License
-
-- **Hyprland** and libraries: **BSD-3-Clause** (upstream)
-- **Build specs and scripts** are **MIT**
+**License: Build specs and scripts** are **[MIT](https://github.com/AshBuk/Hyprland-Fedora?tab=MIT-1-ov-file)**
 
 ## Links
 

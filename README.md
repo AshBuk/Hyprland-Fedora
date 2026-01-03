@@ -7,9 +7,8 @@
 > This is a **personal COPR repository**, not an official Fedora package!  
 > Maintained for personal use and provided as-is.
 
-Source: [fedora-build/hyprland-copr.spec](fedora-build/hyprland-copr.spec) core compositor,
-
-[fedora-build/xdg-desktop-portal-hyprland.spec](fedora-build/xdg-desktop-portal-hyprland.spec) portal spec.
+Source: [hyprland-copr.spec](hyprland-copr.spec) core compositor,
+[xdg-desktop-portal-hyprland.spec](xdg-desktop-portal-hyprland.spec) portal spec.
 
 Follows **hermetic build principles**:
 

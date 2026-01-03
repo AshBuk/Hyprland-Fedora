@@ -6,24 +6,31 @@
 # Create SRPM for COPR submission
 set -e
 
-VERSION="0.53.0"
-RELEASE="1"
-
-# Dependency versions (must match spec file)
-HYPRLAND_PROTOCOLS_VER="0.7.0"
-HYPRWAYLAND_SCANNER_VER="0.4.5"
-HYPRUTILS_VER="0.11.0"
-HYPRLANG_VER="0.6.7"
-HYPRCURSOR_VER="0.1.13"
-HYPRGRAPHICS_VER="0.5.0"
-AQUAMARINE_VER="0.10.0"
-HYPRWIRE_VER="0.2.1"
-GLAZE_VER="6.4.1"
-
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(dirname "$SCRIPT_DIR")"
+SPEC_FILE="$SCRIPT_DIR/hyprland-copr.spec"
+
+# =============================================================================
+# Parse versions from spec file (single source of truth)
+# =============================================================================
+parse_spec_global() {
+    grep -oP "^%global $1\\s+\\K\\S+" "$SPEC_FILE"
+}
+
+VERSION=$(parse_spec_global "hyprland_version")
+RELEASE=$(grep -oP '^Release:\s+\K[0-9]+' "$SPEC_FILE")
+HYPRLAND_PROTOCOLS_VER=$(parse_spec_global "hyprland_protocols_ver")
+HYPRWAYLAND_SCANNER_VER=$(parse_spec_global "hyprwayland_scanner_ver")
+HYPRUTILS_VER=$(parse_spec_global "hyprutils_ver")
+HYPRLANG_VER=$(parse_spec_global "hyprlang_ver")
+HYPRCURSOR_VER=$(parse_spec_global "hyprcursor_ver")
+HYPRGRAPHICS_VER=$(parse_spec_global "hyprgraphics_ver")
+AQUAMARINE_VER=$(parse_spec_global "aquamarine_ver")
+HYPRWIRE_VER=$(parse_spec_global "hyprwire_ver")
+GLAZE_VER=$(parse_spec_global "glaze_ver")
 
 echo "=== Creating SRPM for Hyprland ${VERSION} ==="
+echo "Versions parsed from: $(basename "$SPEC_FILE")"
 
 mkdir -p sources
 cd sources

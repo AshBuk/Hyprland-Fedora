@@ -2,9 +2,19 @@
 # SPDX-License-Identifier: MIT
 # https://copr.fedorainfracloud.org/coprs/ashbuk/Hyprland-Fedora/
 
+# =============================================================================
+# Version definitions (single source of truth)
+# =============================================================================
+%global portal_version          1.3.11
+%global hyprland_min_ver        0.53.0
+%global hyprwayland_scanner_ver 0.4.5
+%global hyprutils_ver           0.11.0
+%global hyprlang_ver            0.6.7
+%global hyprland_protocols_ver  0.7.0
+
 Name:           xdg-desktop-portal-hyprland
-Version:        1.3.11
-Release:        2%{?dist}
+Version:        %{portal_version}
+Release:        3%{?dist}
 Summary:        XDG Desktop Portal backend for Hyprland
 License:        BSD-3-Clause
 URL:            https://github.com/hyprwm/xdg-desktop-portal-hyprland
@@ -12,12 +22,12 @@ URL:            https://github.com/hyprwm/xdg-desktop-portal-hyprland
 # Main source
 Source0:        https://github.com/hyprwm/xdg-desktop-portal-hyprland/archive/refs/tags/v%{version}.tar.gz#/%{name}-%{version}.tar.gz
 
-# Vendored Hyprland libs (same versions as hyprland 0.53.0 package)
+# Vendored Hyprland libs (same versions as hyprland package)
 # These are needed at build time and will be linked via RUNPATH
-Source10:       https://github.com/hyprwm/hyprwayland-scanner/archive/refs/tags/v0.4.5.tar.gz#/hyprwayland-scanner-0.4.5.tar.gz
-Source11:       https://github.com/hyprwm/hyprutils/archive/refs/tags/v0.11.0.tar.gz#/hyprutils-0.11.0.tar.gz
-Source12:       https://github.com/hyprwm/hyprlang/archive/refs/tags/v0.6.7.tar.gz#/hyprlang-0.6.7.tar.gz
-Source13:       https://github.com/hyprwm/hyprland-protocols/archive/refs/tags/v0.7.0.tar.gz#/hyprland-protocols-0.7.0.tar.gz
+Source10:       https://github.com/hyprwm/hyprwayland-scanner/archive/refs/tags/v%{hyprwayland_scanner_ver}.tar.gz#/hyprwayland-scanner-%{hyprwayland_scanner_ver}.tar.gz
+Source11:       https://github.com/hyprwm/hyprutils/archive/refs/tags/v%{hyprutils_ver}.tar.gz#/hyprutils-%{hyprutils_ver}.tar.gz
+Source12:       https://github.com/hyprwm/hyprlang/archive/refs/tags/v%{hyprlang_ver}.tar.gz#/hyprlang-%{hyprlang_ver}.tar.gz
+Source13:       https://github.com/hyprwm/hyprland-protocols/archive/refs/tags/v%{hyprland_protocols_ver}.tar.gz#/hyprland-protocols-%{hyprland_protocols_ver}.tar.gz
 
 # Build dependencies
 BuildRequires:  cmake
@@ -41,7 +51,7 @@ BuildRequires:  qt6-qtbase-devel
 BuildRequires:  qt6-qtwayland-devel
 
 # Runtime deps
-Requires:       hyprland >= 0.53.0
+Requires:       hyprland >= %{hyprland_min_ver}
 Requires:       xdg-desktop-portal
 Requires:       pipewire >= 1.1.82
 
@@ -71,7 +81,7 @@ export CMAKE_PREFIX_PATH="$VENDOR_PREFIX"
 GCC15_CXXFLAGS="%{optflags} -fpermissive"
 
 # 1) hyprwayland-scanner (build tool)
-pushd hyprwayland-scanner-0.4.5
+pushd hyprwayland-scanner-%{hyprwayland_scanner_ver}
 cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$VENDOR_PREFIX" \
   -DCMAKE_INSTALL_LIBDIR=lib64
 cmake --build build --parallel %{_smp_build_ncpus}
@@ -79,7 +89,7 @@ cmake --install build
 popd
 
 # 2) hyprutils
-pushd hyprutils-0.11.0
+pushd hyprutils-%{hyprutils_ver}
 cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$VENDOR_PREFIX" \
   -DCMAKE_PREFIX_PATH="$VENDOR_PREFIX" -DCMAKE_INSTALL_LIBDIR=lib64
 cmake --build build --parallel %{_smp_build_ncpus}
@@ -87,7 +97,7 @@ cmake --install build
 popd
 
 # 3) hyprlang
-pushd hyprlang-0.6.7
+pushd hyprlang-%{hyprlang_ver}
 cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$VENDOR_PREFIX" \
   -DCMAKE_PREFIX_PATH="$VENDOR_PREFIX" -DCMAKE_INSTALL_LIBDIR=lib64
 cmake --build build --parallel %{_smp_build_ncpus}
@@ -95,7 +105,7 @@ cmake --install build
 popd
 
 # 4) hyprland-protocols
-pushd hyprland-protocols-0.7.0
+pushd hyprland-protocols-%{hyprland_protocols_ver}
 meson setup build --prefix="$VENDOR_PREFIX"
 ninja -C build
 ninja -C build install
@@ -139,6 +149,9 @@ done
 %{_userunitdir}/xdg-desktop-portal-hyprland.service
 
 %changelog
+* Sat Jan 03 2026 Asher Buk <AshBuk@users.noreply.github.com> - 1.3.11-3
+- Refactor: use %%global macros for all dependency versions
+
 * Wed Dec 31 2025 Asher Buk <AshBuk@users.noreply.github.com> - 1.3.11-2
 - Rebuild for Hyprland 0.53.0 compatibility
 - Update hyprland-protocols 0.6.4 -> 0.7.0

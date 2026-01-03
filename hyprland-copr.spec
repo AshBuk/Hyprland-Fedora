@@ -2,13 +2,27 @@
 # SPDX-License-Identifier: MIT
 # https://copr.fedorainfracloud.org/coprs/ashbuk/Hyprland-Fedora/
 
+# =============================================================================
+# Version definitions (single source of truth)
+# =============================================================================
+%global hyprland_version        0.53.0
+%global hyprland_protocols_ver  0.7.0
+%global hyprwayland_scanner_ver 0.4.5
+%global hyprutils_ver           0.11.0
+%global hyprlang_ver            0.6.7
+%global hyprcursor_ver          0.1.13
+%global hyprgraphics_ver        0.5.0
+%global aquamarine_ver          0.10.0
+%global hyprwire_ver            0.2.1
+%global glaze_ver               6.4.1
+
 # Exclude auto-requires for vendored Hyprland libraries
 # These are built from source and installed in /usr/libexec/hyprland/vendor/
 %global __requires_exclude pkgconfig\\((aquamarine|hyprutils|hyprlang|hyprcursor|hyprgraphics|hyprwayland-scanner|hyprland-protocols|hyprwire)\\)
 
 Name:           hyprland
-Version:        0.53.0
-Release:        3%{?dist}
+Version:        %{hyprland_version}
+Release:        4%{?dist}
 Summary:        Dynamic tiling Wayland compositor
 License:        BSD-3-Clause
 URL:            https://github.com/hyprwm/Hyprland
@@ -17,23 +31,23 @@ URL:            https://github.com/hyprwm/Hyprland
 Source0:        https://github.com/hyprwm/Hyprland/archive/refs/tags/v%{version}.tar.gz#/%{name}-%{version}.tar.gz
 
 # Git submodules (not included in GitHub tarball)
-Source10:       https://github.com/hyprwm/hyprland-protocols/archive/refs/tags/v0.7.0.tar.gz#/hyprland-protocols-0.7.0.tar.gz
+Source10:       https://github.com/hyprwm/hyprland-protocols/archive/refs/tags/v%{hyprland_protocols_ver}.tar.gz#/hyprland-protocols-%{hyprland_protocols_ver}.tar.gz
 # udis86 from Hyprland subprojects (patched for Python 3.x, with CMakeLists.txt)
-Source11:       https://github.com/AshBuk/Hyprland-Fedora/releases/download/v0.53.0-fedora/udis86-hyprland.tar.gz
+Source11:       https://github.com/AshBuk/Hyprland-Fedora/releases/download/v%{version}-fedora/udis86-hyprland.tar.gz
 
 # Hyprland pinned deps (vendored, fixed versions)
-Source20:       https://github.com/hyprwm/hyprwayland-scanner/archive/refs/tags/v0.4.5.tar.gz#/hyprwayland-scanner-0.4.5.tar.gz
-Source21:       https://github.com/hyprwm/hyprutils/archive/refs/tags/v0.11.0.tar.gz#/hyprutils-0.11.0.tar.gz
-Source22:       https://github.com/hyprwm/hyprlang/archive/refs/tags/v0.6.7.tar.gz#/hyprlang-0.6.7.tar.gz
-Source23:       https://github.com/hyprwm/hyprcursor/archive/refs/tags/v0.1.13.tar.gz#/hyprcursor-0.1.13.tar.gz
-Source24:       https://github.com/hyprwm/hyprgraphics/archive/refs/tags/v0.5.0.tar.gz#/hyprgraphics-0.5.0.tar.gz
-Source25:       https://github.com/hyprwm/aquamarine/archive/refs/tags/v0.10.0.tar.gz#/aquamarine-0.10.0.tar.gz
-# NEW: hyprwire IPC library (includes hyprwire-scanner for hyprctl)
-Source26:       https://github.com/hyprwm/hyprwire/archive/refs/tags/v0.2.1.tar.gz#/hyprwire-0.2.1.tar.gz
+Source20:       https://github.com/hyprwm/hyprwayland-scanner/archive/refs/tags/v%{hyprwayland_scanner_ver}.tar.gz#/hyprwayland-scanner-%{hyprwayland_scanner_ver}.tar.gz
+Source21:       https://github.com/hyprwm/hyprutils/archive/refs/tags/v%{hyprutils_ver}.tar.gz#/hyprutils-%{hyprutils_ver}.tar.gz
+Source22:       https://github.com/hyprwm/hyprlang/archive/refs/tags/v%{hyprlang_ver}.tar.gz#/hyprlang-%{hyprlang_ver}.tar.gz
+Source23:       https://github.com/hyprwm/hyprcursor/archive/refs/tags/v%{hyprcursor_ver}.tar.gz#/hyprcursor-%{hyprcursor_ver}.tar.gz
+Source24:       https://github.com/hyprwm/hyprgraphics/archive/refs/tags/v%{hyprgraphics_ver}.tar.gz#/hyprgraphics-%{hyprgraphics_ver}.tar.gz
+Source25:       https://github.com/hyprwm/aquamarine/archive/refs/tags/v%{aquamarine_ver}.tar.gz#/aquamarine-%{aquamarine_ver}.tar.gz
+# hyprwire IPC library (includes hyprwire-scanner for hyprctl)
+Source26:       https://github.com/hyprwm/hyprwire/archive/refs/tags/v%{hyprwire_ver}.tar.gz#/hyprwire-%{hyprwire_ver}.tar.gz
 
 # glaze JSON library (for hyprpm, mock chroot has no network for FetchContent)
 # Using our release mirror to ensure availability
-Source30:       https://github.com/AshBuk/Hyprland-Fedora/releases/download/v0.53.0-fedora/glaze-6.4.1.tar.gz
+Source30:       https://github.com/AshBuk/Hyprland-Fedora/releases/download/v%{version}-fedora/glaze-%{glaze_ver}.tar.gz
 
 # Build dependencies
 BuildRequires:  cmake
@@ -148,7 +162,7 @@ Please review https://hypr.land/news/update53/ before upgrading.
 # Unpack submodules into correct locations
 rm -rf subprojects/hyprland-protocols subprojects/udis86
 tar -xzf %{SOURCE10} -C subprojects
-mv subprojects/hyprland-protocols-0.7.0 subprojects/hyprland-protocols
+mv subprojects/hyprland-protocols-%{hyprland_protocols_ver} subprojects/hyprland-protocols
 # udis86 from Hyprland subprojects (patched for Python 3.x, includes CMakeLists.txt)
 tar -xzf %{SOURCE11} -C subprojects
 
@@ -197,7 +211,7 @@ export OPENGL_EGL_INCLUDE_DIR=/usr/include
 export OPENGL_INCLUDE_DIR=/usr/include
 
 # 1) hyprwayland-scanner (build tool)
-pushd hyprwayland-scanner-0.4.5
+pushd hyprwayland-scanner-%{hyprwayland_scanner_ver}
 cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$VENDOR_PREFIX" \
   -DCMAKE_INSTALL_LIBDIR=lib64
 cmake --build build --parallel %{_smp_build_ncpus}
@@ -208,7 +222,7 @@ popd
 ls -la "$VENDOR_PREFIX/lib64/cmake/hyprwayland-scanner/" || ls -la "$VENDOR_PREFIX/lib/cmake/hyprwayland-scanner/" || true
 
 # 2) hyprutils
-pushd hyprutils-0.11.0
+pushd hyprutils-%{hyprutils_ver}
 cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$VENDOR_PREFIX" \
   -DCMAKE_PREFIX_PATH="$VENDOR_PREFIX" -DCMAKE_INSTALL_LIBDIR=lib64
 cmake --build build --parallel %{_smp_build_ncpus}
@@ -216,7 +230,7 @@ cmake --install build
 popd
 
 # 3) hyprlang
-pushd hyprlang-0.6.7
+pushd hyprlang-%{hyprlang_ver}
 cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$VENDOR_PREFIX" \
   -DCMAKE_PREFIX_PATH="$VENDOR_PREFIX" -DCMAKE_INSTALL_LIBDIR=lib64
 cmake --build build --parallel %{_smp_build_ncpus}
@@ -224,7 +238,7 @@ cmake --install build
 popd
 
 # 4) hyprcursor
-pushd hyprcursor-0.1.13
+pushd hyprcursor-%{hyprcursor_ver}
 cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$VENDOR_PREFIX" \
   -DCMAKE_PREFIX_PATH="$VENDOR_PREFIX" -DCMAKE_INSTALL_LIBDIR=lib64
 cmake --build build --parallel %{_smp_build_ncpus}
@@ -232,7 +246,7 @@ cmake --install build
 popd
 
 # 5) hyprgraphics
-pushd hyprgraphics-0.5.0
+pushd hyprgraphics-%{hyprgraphics_ver}
 cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$VENDOR_PREFIX" \
   -DCMAKE_PREFIX_PATH="$VENDOR_PREFIX" -DCMAKE_INSTALL_LIBDIR=lib64
 cmake --build build --parallel %{_smp_build_ncpus}
@@ -242,7 +256,7 @@ popd
 # 6) aquamarine (needs -fpermissive for generated protocol code with zero-size arrays)
 # Explicitly set hyprwayland-scanner_DIR since CMAKE_PREFIX_PATH may not work in mock chroot
 # Also need explicit OpenGL/EGL paths for libglvnd on Fedora
-pushd aquamarine-0.10.0
+pushd aquamarine-%{aquamarine_ver}
 cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$VENDOR_PREFIX" \
   -DCMAKE_PREFIX_PATH="$VENDOR_PREFIX" -DCMAKE_INSTALL_LIBDIR=lib64 \
   -Dhyprwayland-scanner_DIR="$VENDOR_PREFIX/lib64/cmake/hyprwayland-scanner" \
@@ -258,8 +272,8 @@ cmake --build build --parallel %{_smp_build_ncpus}
 cmake --install build
 popd
 
-# 7) hyprwire (NEW: IPC library + scanner for hyprctl)
-pushd hyprwire-0.2.1
+# 7) hyprwire (IPC library + scanner for hyprctl)
+pushd hyprwire-%{hyprwire_ver}
 cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$VENDOR_PREFIX" \
   -DCMAKE_PREFIX_PATH="$VENDOR_PREFIX" -DCMAKE_INSTALL_LIBDIR=lib64
 cmake --build build --parallel %{_smp_build_ncpus}
@@ -284,7 +298,7 @@ cmake -B build \
   -DCMAKE_PREFIX_PATH="$VENDOR_PREFIX" \
   -Dhyprwayland-scanner_DIR="$VENDOR_PREFIX/lib64/cmake/hyprwayland-scanner" \
   -DCMAKE_CXX_FLAGS="$GCC15_CXXFLAGS" \
-  -DFETCHCONTENT_SOURCE_DIR_GLAZE="$(pwd)/glaze-6.4.1" \
+  -DFETCHCONTENT_SOURCE_DIR_GLAZE="$(pwd)/glaze-%{glaze_ver}" \
   -DBUILD_TESTING=OFF \
   -DCMAKE_INSTALL_RPATH="$VENDOR_RPATH" \
   -DCMAKE_BUILD_WITH_INSTALL_RPATH=ON \
@@ -386,14 +400,11 @@ rm -rf %{buildroot}%{_datadir}/glaze
 %{_datadir}/zsh/site-functions/_hyprpm
 
 %changelog
+* Sat Jan 03 2026 Asher Buk <AshBuk@users.noreply.github.com> - 0.53.0-4
+- Refactor: use %%global macros for all dependency versions
+- Refactor: create-srpm.sh now parses versions from spec file
+
 * Wed Dec 31 2025 Asher Buk <AshBuk@users.noreply.github.com> - 0.53.0-3
-- Exclude auto-requires for vendored Hyprland libraries (aquamarine, hyprutils, etc.)
-- Fixes "nothing provides pkgconfig(...)" errors during upgrade
-
-* Wed Dec 31 2025 Asher Buk <AshBuk@users.noreply.github.com> - 0.53.0-2
-- Fix muparser package name (muparser -> muParser) for Fedora
-
-* Wed Dec 31 2025 Asher Buk <AshBuk@users.noreply.github.com> - 0.53.0-1
 - Update to Hyprland 0.53.0
 - BREAKING: Window rules syntax completely reworked (see https://hypr.land/news/update53/)
 - NEW: start-hyprland watchdog binary for crash recovery and safe mode
@@ -402,6 +413,8 @@ rm -rf %{buildroot}%{_datadir}/glaze
 - Update hyprgraphics 0.4.0 -> 0.5.0
 - Update glaze 5.1.1 -> 6.4.1
 - Add libffi dependency for hyprwire
+- Add muParser dependency for math expressions in config
+- Exclude auto-requires for vendored Hyprland libraries
 
 * Thu Dec 18 2025 Asher Buk <AshBuk@users.noreply.github.com> - 0.52.2-2
 - Fix ELF corruption: set RPATH at build time via CMAKE_INSTALL_RPATH

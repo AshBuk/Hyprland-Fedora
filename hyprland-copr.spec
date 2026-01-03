@@ -5,7 +5,7 @@
 # =============================================================================
 # Version definitions (single source of truth)
 # =============================================================================
-%global hyprland_version        0.53.0
+%global hyprland_version        0.53.1
 %global hyprland_protocols_ver  0.7.0
 %global hyprwayland_scanner_ver 0.4.5
 %global hyprutils_ver           0.11.0
@@ -22,7 +22,7 @@
 
 Name:           hyprland
 Version:        %{hyprland_version}
-Release:        4%{?dist}
+Release:        1%{?dist}
 Summary:        Dynamic tiling Wayland compositor
 License:        BSD-3-Clause
 URL:            https://github.com/hyprwm/Hyprland
@@ -401,6 +401,7 @@ rm -rf %{buildroot}%{_datadir}/glaze
 
 %changelog
 * Sat Jan 03 2026 Asher Buk <AshBuk@users.noreply.github.com> - 0.53.0-4
+- Update to Hyprland 0.53.1 (patch release with bugfixes)
 - Refactor: use %%global macros for all dependency versions
 - Refactor: create-srpm.sh now parses versions from spec file
 

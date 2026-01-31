@@ -294,13 +294,15 @@ popd
 # Use local glaze source (mock chroot has no network for FetchContent)
 # Disable BUILD_TESTING to skip hyprtester (its plugin Makefile doesn't support vendored deps)
 # Set RPATH at build time to avoid patchelf corruption issues
+# Add glaze include path for start-hyprland (it doesn't use FetchContent, just #include)
 VENDOR_RPATH='$ORIGIN/../libexec/hyprland/vendor/lib64:$ORIGIN/../libexec/hyprland/vendor/lib'
+GLAZE_INCLUDE="-I$(pwd)/glaze-%{glaze_ver}/include"
 cmake -B build \
   -DCMAKE_BUILD_TYPE=Release \
   -DCMAKE_INSTALL_PREFIX=%{_prefix} \
   -DCMAKE_PREFIX_PATH="$VENDOR_PREFIX" \
   -Dhyprwayland-scanner_DIR="$VENDOR_PREFIX/lib64/cmake/hyprwayland-scanner" \
-  -DCMAKE_CXX_FLAGS="$GCC15_CXXFLAGS" \
+  -DCMAKE_CXX_FLAGS="$GCC15_CXXFLAGS $GLAZE_INCLUDE" \
   -DFETCHCONTENT_SOURCE_DIR_GLAZE="$(pwd)/glaze-%{glaze_ver}" \
   -DBUILD_TESTING=OFF \
   -DCMAKE_INSTALL_RPATH="$VENDOR_RPATH" \

@@ -313,14 +313,8 @@ cmake -B build \
   -DOPENGL_INCLUDE_DIR=/usr/include
 cmake --build build --parallel %{_smp_build_ncpus}
 
-# 10) start-hyprland (NEW: watchdog/crash recovery binary)
-pushd start
-cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=%{_prefix} \
-  -DCMAKE_PREFIX_PATH="$VENDOR_PREFIX" \
-  -DCMAKE_INSTALL_RPATH="$VENDOR_RPATH" \
-  -DCMAKE_BUILD_WITH_INSTALL_RPATH=ON
-cmake --build build --parallel %{_smp_build_ncpus}
-popd
+# Note: start-hyprland is built via add_subdirectory(start) in main CMakeLists.txt
+# No separate build step needed - it inherits glaze and other settings from parent
 
 %check
 # Tests disabled: hyprtester doesn't support vendored deps
@@ -328,11 +322,8 @@ popd
 %install
 VENDOR_PREFIX="$(pwd)/vendor"
 
-# Install Hyprland binaries/data
+# Install Hyprland binaries/data (includes start-hyprland via add_subdirectory)
 DESTDIR=%{buildroot} cmake --install build
-
-# Install start-hyprland
-DESTDIR=%{buildroot} cmake --install start/build
 
 # Ensure "hyprland" alias exists (some setups expect it)
 ln -sf Hyprland %{buildroot}%{_bindir}/hyprland

@@ -5,7 +5,7 @@
 # =============================================================================
 # Version definitions (single source of truth)
 # =============================================================================
-%global hyprland_version        0.53.1
+%global hyprland_version        0.53.3
 %global hyprland_protocols_ver  0.7.0
 %global hyprwayland_scanner_ver 0.4.5
 %global hyprutils_ver           0.11.0
@@ -403,6 +403,9 @@ rm -rf %{buildroot}%{_datadir}/glaze
 %{_datadir}/zsh/site-functions/_hyprpm
 
 %changelog
+* Sat Jan 31 2026 Asher Buk <AshBuk@users.noreply.github.com> - 0.53.3-1
+- Update to Hyprland 0.53.3 (patch release)
+
 * Sat Jan 03 2026 Asher Buk <AshBuk@users.noreply.github.com> - 0.53.0-4
 - Update to Hyprland 0.53.1 (patch release with bugfixes)
 - Refactor: use %%global macros for all dependency versions

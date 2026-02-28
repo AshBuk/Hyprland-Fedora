@@ -6,15 +6,15 @@
 # Version definitions (single source of truth)
 # =============================================================================
 %global portal_version          1.3.11
-%global hyprland_min_ver        0.53.1
+%global hyprland_min_ver        0.54.0
 %global hyprwayland_scanner_ver 0.4.5
 %global hyprutils_ver           0.11.0
-%global hyprlang_ver            0.6.7
+%global hyprlang_ver            0.6.8
 %global hyprland_protocols_ver  0.7.0
 
 Name:           xdg-desktop-portal-hyprland
 Version:        %{portal_version}
-Release:        4%{?dist}
+Release:        5%{?dist}
 Summary:        XDG Desktop Portal backend for Hyprland
 License:        BSD-3-Clause
 URL:            https://github.com/hyprwm/xdg-desktop-portal-hyprland
@@ -149,6 +149,11 @@ done
 %{_userunitdir}/xdg-desktop-portal-hyprland.service
 
 %changelog
+* Sat Feb 28 2026 Asher Buk <AshBuk@users.noreply.github.com> - 1.3.11-5
+- Rebuild for Hyprland 0.54.0 compatibility
+- Update hyprlang 0.6.7 -> 0.6.8
+- Require hyprland >= 0.54.0
+
 * Sat Jan 03 2026 Asher Buk <AshBuk@users.noreply.github.com> - 1.3.11-4
 - Require hyprland >= 0.53.1 (patch release with bugfixes)
 

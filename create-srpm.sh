@@ -48,10 +48,12 @@ if [ ! -f "hyprland-protocols-${HYPRLAND_PROTOCOLS_VER}.tar.gz" ]; then
          "https://github.com/hyprwm/hyprland-protocols/archive/refs/tags/v${HYPRLAND_PROTOCOLS_VER}.tar.gz"
 fi
 
-# udis86: use local subproject (patched for Python 3.x, includes CMakeLists.txt)
+# udis86: download from build assets release (patched for Python 3.x, includes CMakeLists.txt)
+BUILD_ASSETS_RELEASE=$(parse_spec_global "build_assets_release")
 if [ ! -f "udis86-hyprland.tar.gz" ]; then
-    echo "Creating udis86 tarball from local subproject..."
-    (cd "$REPO_ROOT/subprojects" && tar -czvf "$SCRIPT_DIR/sources/udis86-hyprland.tar.gz" udis86)
+    echo "Downloading udis86..."
+    curl -L -o "udis86-hyprland.tar.gz" \
+         "https://github.com/AshBuk/Hyprland-Fedora/releases/download/${BUILD_ASSETS_RELEASE}/udis86-hyprland.tar.gz"
 fi
 
 # Download dependencies

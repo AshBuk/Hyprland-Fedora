@@ -5,19 +5,19 @@
 # =============================================================================
 # Version definitions (single source of truth)
 # =============================================================================
-%global hyprland_version        0.53.3
+%global hyprland_version        0.54.0
 %global hyprland_protocols_ver  0.7.0
 %global hyprwayland_scanner_ver 0.4.5
 %global hyprutils_ver           0.11.0
-%global hyprlang_ver            0.6.7
+%global hyprlang_ver            0.6.8
 %global hyprcursor_ver          0.1.13
 %global hyprgraphics_ver        0.5.0
 %global aquamarine_ver          0.10.0
-%global hyprwire_ver            0.2.1
-%global glaze_ver               6.4.1
+%global hyprwire_ver            0.3.0
+%global glaze_ver               7.0.0
 
 # Build assets release (udis86, glaze tarballs - only changes when these deps update)
-%global build_assets_release    v0.53-fedora
+%global build_assets_release    v0.54-fedora
 
 # Exclude auto-requires for vendored Hyprland libraries
 # These are built from source and installed in /usr/libexec/hyprland/vendor/
@@ -25,7 +25,7 @@
 
 Name:           hyprland
 Version:        %{hyprland_version}
-Release:        2%{?dist}
+Release:        1%{?dist}
 Summary:        Dynamic tiling Wayland compositor
 License:        BSD-3-Clause
 URL:            https://github.com/hyprwm/Hyprland
@@ -156,8 +156,8 @@ This is a single-package COPR build for Fedora 43.
 Pinned Hyprland dependencies are built from fixed-version sources and installed
 into a private vendor prefix to avoid polluting system /usr/lib64.
 
-Note: Version 0.53.0 includes breaking changes in window rules syntax.
-Please review https://hypr.land/news/update53/ before upgrading.
+Note: Version 0.54.0 removes togglesplit/swapsplit (use layoutmsg instead)
+and migrates single_window_aspect_ratio from dwindle to layout.
 
 %prep
 %autosetup -n Hyprland-%{version}
@@ -400,6 +400,9 @@ rm -rf %{buildroot}%{_datadir}/glaze
 %{_datadir}/zsh/site-functions/_hyprpm
 
 %changelog
+* Sat Feb 28 2026 Asher Buk <AshBuk@users.noreply.github.com> - 0.54.0-1
+- Update to Hyprland 0.54.0
+
 * Sat Jan 31 2026 Asher Buk <AshBuk@users.noreply.github.com> - 0.53.3-1
 - Update to Hyprland 0.53.3 (patch release)
 
@@ -410,15 +413,6 @@ rm -rf %{buildroot}%{_datadir}/glaze
 
 * Wed Dec 31 2025 Asher Buk <AshBuk@users.noreply.github.com> - 0.53.0-3
 - Update to Hyprland 0.53.0
-- BREAKING: Window rules syntax completely reworked (see https://hypr.land/news/update53/)
-- NEW: start-hyprland watchdog binary for crash recovery and safe mode
-- NEW: hyprwire IPC library (v0.2.1) for improved hyprctl communication
-- Update hyprland-protocols 0.6.4 -> 0.7.0
-- Update hyprgraphics 0.4.0 -> 0.5.0
-- Update glaze 5.1.1 -> 6.4.1
-- Add libffi dependency for hyprwire
-- Add muParser dependency for math expressions in config
-- Exclude auto-requires for vendored Hyprland libraries
 
 * Thu Dec 18 2025 Asher Buk <AshBuk@users.noreply.github.com> - 0.52.2-2
 - Fix ELF corruption: set RPATH at build time via CMAKE_INSTALL_RPATH

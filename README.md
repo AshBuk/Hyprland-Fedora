@@ -1,4 +1,4 @@
-# Hyprland 0.53↑ for Fedora
+# Hyprland for Fedora
 
 [![Copr build status](https://copr.fedorainfracloud.org/coprs/ashbuk/Hyprland-Fedora/package/hyprland/status_image/last_build.png)](https://copr.fedorainfracloud.org/coprs/ashbuk/Hyprland-Fedora/)
 
@@ -56,7 +56,7 @@ sudo dnf copr disable ashbuk/Hyprland-Fedora
 
 **Vendored libraries** (in `/usr/libexec/hyprland/vendor/`):
 
-libaquamarine, libhyprlang, libhyprutils, libhyprcursor, libhyprgraphics, libhyprwire
+libaquamarine, libhyprlang, libhyprutils, libhyprcursor, libhyprgraphics, libhyprwire, hyprwayland-scanner, hyprland-protocols, udis86, glaze
 
 ## Build Details
 

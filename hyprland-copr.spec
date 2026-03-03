@@ -5,7 +5,7 @@
 # =============================================================================
 # Version definitions (single source of truth)
 # =============================================================================
-%global hyprland_version        0.54.0
+%global hyprland_version        0.54.1
 %global hyprland_protocols_ver  0.7.0
 %global hyprwayland_scanner_ver 0.4.5
 %global hyprutils_ver           0.11.0
@@ -156,7 +156,7 @@ This is a single-package COPR build for Fedora 43.
 Pinned Hyprland dependencies are built from fixed-version sources and installed
 into a private vendor prefix to avoid polluting system /usr/lib64.
 
-Note: Version 0.54.0 removes togglesplit/swapsplit (use layoutmsg instead)
+Note: Version 0.54.x removes togglesplit/swapsplit (use layoutmsg instead)
 and migrates single_window_aspect_ratio from dwindle to layout.
 
 %prep
@@ -400,8 +400,8 @@ rm -rf %{buildroot}%{_datadir}/glaze
 %{_datadir}/zsh/site-functions/_hyprpm
 
 %changelog
-* Sat Feb 28 2026 Asher Buk <AshBuk@users.noreply.github.com> - 0.54.0-1
-- Update to Hyprland 0.54.0
+* Mon Mar 03 2026 Asher Buk <AshBuk@users.noreply.github.com> - 0.54.1-1
+- Update to Hyprland 0.54.1 (patch release)
 
 * Sat Jan 31 2026 Asher Buk <AshBuk@users.noreply.github.com> - 0.53.3-1
 - Update to Hyprland 0.53.3 (patch release)

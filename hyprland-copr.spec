@@ -34,7 +34,7 @@ License:        BSD-3-Clause
 URL:            https://github.com/hyprwm/Hyprland
 
 # Main source
-Source0:        https://github.com/hyprwm/Hyprland/archive/refs/tags/v%{version}.tar.gz#/%{name}-%{version}.tar.gz
+Source0:        https://github.com/hyprwm/Hyprland/archive/refs/tags/v%{hyprland_version}.tar.gz#/%{name}-%{hyprland_version}.tar.gz
 
 # Git submodules (not included in GitHub tarball)
 Source10:       https://github.com/hyprwm/hyprland-protocols/archive/refs/tags/v%{hyprland_protocols_ver}.tar.gz#/hyprland-protocols-%{hyprland_protocols_ver}.tar.gz
@@ -199,7 +199,7 @@ actions on inactivity timeouts, such as locking the screen, turning off
 the display, or suspending the system.
 
 %prep
-%autosetup -n Hyprland-%{version}
+%autosetup -n Hyprland-%{hyprland_version}
 
 # Unpack submodules into correct locations
 rm -rf subprojects/hyprland-protocols subprojects/udis86

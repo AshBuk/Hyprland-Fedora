@@ -15,6 +15,9 @@
 %global aquamarine_ver          0.10.0
 %global hyprwire_ver            0.3.0
 %global glaze_ver               7.0.0
+# Subpackage versions
+%global hyprlock_version        0.9.3
+%global hypridle_version        0.1.7
 
 # Build assets release (udis86, glaze tarballs - only changes when these deps update)
 %global build_assets_release    v0.54-fedora
@@ -25,7 +28,7 @@
 
 Name:           hyprland
 Version:        %{hyprland_version}
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Dynamic tiling Wayland compositor
 License:        BSD-3-Clause
 URL:            https://github.com/hyprwm/Hyprland
@@ -51,6 +54,10 @@ Source26:       https://github.com/hyprwm/hyprwire/archive/refs/tags/v%{hyprwire
 # glaze JSON library (for hyprpm, mock chroot has no network for FetchContent)
 # Using our release mirror to ensure availability
 Source30:       https://github.com/AshBuk/Hyprland-Fedora/releases/download/%{build_assets_release}/glaze-%{glaze_ver}.tar.gz
+
+# Subpackage sources
+Source40:       https://github.com/hyprwm/hyprlock/archive/refs/tags/v%{hyprlock_version}.tar.gz#/hyprlock-%{hyprlock_version}.tar.gz
+Source41:       https://github.com/hyprwm/hypridle/archive/refs/tags/v%{hypridle_version}.tar.gz#/hypridle-%{hypridle_version}.tar.gz
 
 # Build dependencies
 BuildRequires:  cmake
@@ -91,7 +98,7 @@ BuildRequires:  libseat-devel
 BuildRequires:  systemd-devel
 BuildRequires:  tomlplusplus-devel
 BuildRequires:  wayland-devel
-BuildRequires:  wayland-protocols-devel
+BuildRequires:  wayland-protocols-devel >= 1.35
 BuildRequires:  libzip-devel
 BuildRequires:  librsvg2-devel
 BuildRequires:  libjpeg-turbo-devel
@@ -111,6 +118,9 @@ BuildRequires:  libuuid-devel
 BuildRequires:  libffi-devel
 # NEW: muparser for math expressions in config (0.53.0)
 BuildRequires:  muParser-devel
+# Subpackage deps (hyprlock: PAM auth, hyprlock+hypridle: D-Bus IPC)
+BuildRequires:  pam-devel
+BuildRequires:  sdbus-cpp-devel >= 2.0.0
 
 # Runtime deps (system)
 Requires:       cairo
@@ -159,6 +169,35 @@ into a private vendor prefix to avoid polluting system /usr/lib64.
 Note: Version 0.54.x removes togglesplit/swapsplit (use layoutmsg instead)
 and migrates single_window_aspect_ratio from dwindle to layout.
 
+# -----------------------------------------------------------------------------
+# Subpackage: hyprlock
+# -----------------------------------------------------------------------------
+%package -n hyprlock
+Version:        %{hyprlock_version}
+Summary:        Hyprland screen lock utility
+License:        BSD-3-Clause
+Requires:       hyprland >= %{hyprland_version}
+Requires:       pam
+
+%description -n hyprlock
+hyprlock is a screen lock utility for Hyprland. It uses the ext-session-lock
+Wayland protocol for secure screen locking, supports PAM authentication,
+and provides a customizable lock screen with widgets and effects.
+
+# -----------------------------------------------------------------------------
+# Subpackage: hypridle
+# -----------------------------------------------------------------------------
+%package -n hypridle
+Version:        %{hypridle_version}
+Summary:        Hyprland idle daemon
+License:        BSD-3-Clause
+Requires:       hyprland >= %{hyprland_version}
+
+%description -n hypridle
+hypridle is Hyprland's idle daemon. It monitors user activity and triggers
+actions on inactivity timeouts, such as locking the screen, turning off
+the display, or suspending the system.
+
 %prep
 %autosetup -n Hyprland-%{version}
 
@@ -180,6 +219,10 @@ tar -xzf %{SOURCE26}
 
 # Unpack glaze (for hyprpm, mock chroot has no network for FetchContent)
 tar -xzf %{SOURCE30}
+
+# Unpack subpackage sources
+tar -xzf %{SOURCE40}
+tar -xzf %{SOURCE41}
 
 %build
 # hwdata.pc for pkg-config consumers
@@ -322,6 +365,40 @@ cmake --build build --parallel %{_smp_build_ncpus}
 # Note: start-hyprland is built via add_subdirectory(start) in main CMakeLists.txt
 # No separate build step needed - it inherits glaze and other settings from parent
 
+# 11) hyprlock (screen lock utility, needs OpenGL/EGL)
+SUBPKG_RPATH='%{_libexecdir}/hyprland/vendor/lib64:%{_libexecdir}/hyprland/vendor/lib'
+pushd hyprlock-%{hyprlock_version}
+cmake -B build \
+  -DCMAKE_BUILD_TYPE=Release \
+  -DCMAKE_INSTALL_PREFIX=%{_prefix} \
+  -DCMAKE_PREFIX_PATH="$VENDOR_PREFIX" \
+  -Dhyprwayland-scanner_DIR="$VENDOR_PREFIX/lib64/cmake/hyprwayland-scanner" \
+  -DCMAKE_CXX_FLAGS="$GCC15_CXXFLAGS" \
+  -DCMAKE_INSTALL_RPATH="$SUBPKG_RPATH" \
+  -DCMAKE_BUILD_WITH_INSTALL_RPATH=ON \
+  -DOpenGL_GL_PREFERENCE=GLVND \
+  -DOPENGL_opengl_LIBRARY=%{_libdir}/libOpenGL.so \
+  -DOPENGL_gles3_LIBRARY=%{_libdir}/libGLESv2.so \
+  -DOPENGL_GLES3_INCLUDE_DIR=/usr/include \
+  -DOPENGL_egl_LIBRARY=%{_libdir}/libEGL.so \
+  -DOPENGL_EGL_INCLUDE_DIR=/usr/include \
+  -DOPENGL_INCLUDE_DIR=/usr/include
+cmake --build build --parallel %{_smp_build_ncpus}
+popd
+
+# 12) hypridle (idle daemon, no OpenGL needed)
+pushd hypridle-%{hypridle_version}
+cmake -B build \
+  -DCMAKE_BUILD_TYPE=Release \
+  -DCMAKE_INSTALL_PREFIX=%{_prefix} \
+  -DCMAKE_PREFIX_PATH="$VENDOR_PREFIX" \
+  -Dhyprwayland-scanner_DIR="$VENDOR_PREFIX/lib64/cmake/hyprwayland-scanner" \
+  -DCMAKE_CXX_FLAGS="$GCC15_CXXFLAGS" \
+  -DCMAKE_INSTALL_RPATH="$SUBPKG_RPATH" \
+  -DCMAKE_BUILD_WITH_INSTALL_RPATH=ON
+cmake --build build --parallel %{_smp_build_ncpus}
+popd
+
 %check
 # Tests disabled: hyprtester doesn't support vendored deps
 
@@ -353,10 +430,14 @@ install -d "$VENDOR_DST/lib64" "$VENDOR_DST/lib"
 cp -a "$VENDOR_PREFIX"/lib64/lib*.so* "$VENDOR_DST/lib64/" 2>/dev/null || true
 cp -a "$VENDOR_PREFIX"/lib/lib*.so*   "$VENDOR_DST/lib/"   2>/dev/null || true
 
+# Install hyprlock and hypridle
+DESTDIR=%{buildroot} cmake --install hyprlock-%{hyprlock_version}/build
+DESTDIR=%{buildroot} cmake --install hypridle-%{hypridle_version}/build
+
 # Verify RPATH is set correctly (was set at build time via CMAKE_INSTALL_RPATH)
 # Using patchelf post-install can corrupt ELF program headers, so we set RPATH at build time
 echo "Verifying RPATH on installed binaries:"
-for bin in %{buildroot}%{_bindir}/Hyprland %{buildroot}%{_bindir}/hyprctl %{buildroot}%{_bindir}/hyprpm %{buildroot}%{_bindir}/start-hyprland; do
+for bin in %{buildroot}%{_bindir}/Hyprland %{buildroot}%{_bindir}/hyprctl %{buildroot}%{_bindir}/hyprpm %{buildroot}%{_bindir}/start-hyprland %{buildroot}%{_bindir}/hyprlock %{buildroot}%{_bindir}/hypridle; do
   [ -x "$bin" ] || continue
   echo "  $(basename $bin): $(readelf -d "$bin" 2>/dev/null | grep -E 'RPATH|RUNPATH' || echo 'no RPATH set')"
 done
@@ -381,8 +462,10 @@ rm -rf %{buildroot}%{_datadir}/glaze
 # Desktop entries
 %{_datadir}/wayland-sessions/hyprland.desktop
 %{_datadir}/wayland-sessions/hyprland-uwsm.desktop
-# Data files
+# Data files (exclude subpackage configs to avoid ownership conflicts)
 %{_datadir}/hypr/
+%exclude %{_datadir}/hypr/hyprlock.conf
+%exclude %{_datadir}/hypr/hypridle.conf
 %{_datadir}/xdg-desktop-portal/hyprland-portals.conf
 # Development headers
 %{_includedir}/hyprland/
@@ -399,7 +482,23 @@ rm -rf %{buildroot}%{_datadir}/glaze
 %{_datadir}/zsh/site-functions/_hyprctl
 %{_datadir}/zsh/site-functions/_hyprpm
 
+%files -n hyprlock
+%license hyprlock-%{hyprlock_version}/LICENSE
+%{_bindir}/hyprlock
+%config(noreplace) %{_sysconfdir}/pam.d/hyprlock
+%{_datadir}/hypr/hyprlock.conf
+
+%files -n hypridle
+%license hypridle-%{hypridle_version}/LICENSE
+%{_bindir}/hypridle
+%{_userunitdir}/hypridle.service
+%{_datadir}/hypr/hypridle.conf
+
 %changelog
+* Sun Apr 06 2026 Asher Buk <AshBuk@users.noreply.github.com> - 0.54.3-2
+- Add hyprlock 0.9.3 and hypridle 0.1.7 as subpackages
+- Vendored libs shared with main Hyprland build
+
 * Sun Mar 29 2026 Asher Buk <AshBuk@users.noreply.github.com> - 0.54.3-1
 - Update to Hyprland 0.54.3 (patch release)
 

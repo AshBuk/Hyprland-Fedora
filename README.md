@@ -7,7 +7,7 @@
 > This is a **personal COPR repository**, not an official Fedora package!  
 > Maintained for personal use and provided as-is.
 
-Source: [hyprland-copr.spec](hyprland-copr.spec) core compositor,
+Source: [hyprland-copr.spec](hyprland-copr.spec) compositor + hyprlock + hypridle,
 [xdg-desktop-portal-hyprland.spec](xdg-desktop-portal-hyprland.spec) portal spec.
 
 Follows **hermetic build principles**:
@@ -52,6 +52,8 @@ sudo dnf copr disable ashbuk/Hyprland-Fedora
 | Package | Description |
 |---------|-------------|
 | `hyprland` | Dynamic tiling Wayland compositor (`Hyprland`, `hyprctl`, `hyprpm`, `start-hyprland`) |
+| `hyprlock` | Screen lock utility (subpackage, installed with hyprland) |
+| `hypridle` | Idle daemon for lock/sleep on inactivity (subpackage, installed with hyprland) |
 | `xdg-desktop-portal-hyprland` | Portal backend for screen sharing, file dialogs |
 
 **Vendored libraries** (in `/usr/libexec/hyprland/vendor/`):

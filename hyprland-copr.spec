@@ -157,6 +157,9 @@ Requires:       xorg-x11-server-Xwayland
 Requires:       libffi
 # NEW: muparser for math expressions in config (0.53.0)
 Requires:       muParser
+# Subpackages (installed by default via weak deps, removable individually)
+Recommends:     hyprlock
+Recommends:     hypridle
 
 %description
 Hyprland is a dynamic tiling Wayland compositor with modern Wayland features,

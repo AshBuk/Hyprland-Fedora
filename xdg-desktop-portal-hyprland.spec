@@ -3,7 +3,7 @@
 # https://copr.fedorainfracloud.org/coprs/ashbuk/Hyprland-Fedora/
 
 # =============================================================================
-# Version definitions (single source of truth)
+# Version definitions
 # =============================================================================
 %global portal_version          1.3.11
 %global hyprland_min_ver        0.54.0

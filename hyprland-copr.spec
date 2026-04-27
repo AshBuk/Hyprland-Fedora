@@ -12,7 +12,7 @@
 %global hyprlang_ver            0.6.8
 %global hyprcursor_ver          0.1.13
 %global hyprgraphics_ver        0.5.0
-%global aquamarine_ver          0.10.0
+%global aquamarine_ver          0.11.0
 %global hyprwire_ver            0.3.0
 %global glaze_ver               7.0.0
 # Subpackage versions
@@ -28,7 +28,7 @@
 
 Name:           hyprland
 Version:        %{hyprland_version}
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        Dynamic tiling Wayland compositor
 License:        BSD-3-Clause
 URL:            https://github.com/hyprwm/Hyprland
@@ -347,6 +347,14 @@ popd
 # Disable BUILD_TESTING to skip hyprtester (its plugin Makefile doesn't support vendored deps)
 # Set RPATH at build time to avoid patchelf corruption issues
 # Add vendor include path for glaze headers (start-hyprland uses direct #include, not find_package)
+# Hyprland CMakeLists reads these env vars and falls back to "unknown" otherwise (tarball has no .git)
+export GIT_TAG="v%{hyprland_version}"
+export GIT_BRANCH="main"
+export GIT_COMMIT_HASH="release-v%{hyprland_version}"
+export GIT_COMMIT_MESSAGE="Release v%{hyprland_version}"
+export GIT_COMMIT_DATE="$(date -u -d "@${SOURCE_DATE_EPOCH:-$(date +%s)}" +%Y-%m-%d)"
+export GIT_DIRTY=""
+export GIT_COMMITS="0"
 VENDOR_RPATH='$ORIGIN/../libexec/hyprland/vendor/lib64:$ORIGIN/../libexec/hyprland/vendor/lib'
 cmake -B build \
   -DCMAKE_BUILD_TYPE=Release \
@@ -498,6 +506,9 @@ rm -rf %{buildroot}%{_datadir}/glaze
 %{_datadir}/hypr/hypridle.conf
 
 %changelog
+* Mon Apr 27 2026 Asher Buk <AshBuk@users.noreply.github.com> - 0.54.3-3
+- Bump aquamarine to 0.11.0
+
 * Sun Apr 06 2026 Asher Buk <AshBuk@users.noreply.github.com> - 0.54.3-2
 - Add hyprlock 0.9.3 and hypridle 0.1.7 as subpackages
 - Vendored libs shared with main Hyprland build

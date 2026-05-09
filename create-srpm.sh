@@ -140,7 +140,7 @@ for spec in "${SPECS[@]}"; do
     rpmbuild -bs "$spec" \
              --define "_sourcedir $(pwd)/sources" \
              --define "_srcrpmdir $(pwd)/srpm" \
-             --define "dist .fc43"
+             --define "dist %{nil}"
 done
 
 echo ""

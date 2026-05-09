@@ -19,7 +19,7 @@ Follows **hermetic build principles**:
 
 ### Why This Repo?
 
-Fedora 43 does not ship Hyprland in official repositories. Existing COPRs rely on external package dependencies which can break on version mismatches.
+Fedora 43/44 does not ship Hyprland in official repositories. Existing COPRs rely on external package dependencies which can break on version mismatches.
 
 **Technical guarantees:**
 

@@ -15,6 +15,8 @@
 %global aquamarine_ver          0.11.0
 %global hyprwire_ver            0.3.1
 %global glaze_ver               7.0.0
+# Lua 5.5 (Hyprland 0.55.0+ requires >= 5.5; Fedora 43/44 ship 5.4.8)
+%global lua_ver                 5.5.0
 # Subpackage versions
 %global hyprlock_version        0.9.5
 %global hypridle_version        0.1.7
@@ -48,8 +50,8 @@ Source22:       https://github.com/hyprwm/hyprlang/archive/refs/tags/v%{hyprlang
 Source23:       https://github.com/hyprwm/hyprcursor/archive/refs/tags/v%{hyprcursor_ver}.tar.gz#/hyprcursor-%{hyprcursor_ver}.tar.gz
 Source24:       https://github.com/hyprwm/hyprgraphics/archive/refs/tags/v%{hyprgraphics_ver}.tar.gz#/hyprgraphics-%{hyprgraphics_ver}.tar.gz
 Source25:       https://github.com/hyprwm/aquamarine/archive/refs/tags/v%{aquamarine_ver}.tar.gz#/aquamarine-%{aquamarine_ver}.tar.gz
-# hyprwire IPC library (includes hyprwire-scanner for hyprctl)
 Source26:       https://github.com/hyprwm/hyprwire/archive/refs/tags/v%{hyprwire_ver}.tar.gz#/hyprwire-%{hyprwire_ver}.tar.gz
+Source27:       https://www.lua.org/ftp/lua-%{lua_ver}.tar.gz
 
 # glaze JSON library (for hyprpm, mock chroot has no network for FetchContent)
 # Using our release mirror to ensure availability
@@ -216,6 +218,7 @@ tar -xzf %{SOURCE23}
 tar -xzf %{SOURCE24}
 tar -xzf %{SOURCE25}
 tar -xzf %{SOURCE26}
+tar -xzf %{SOURCE27}
 
 # Unpack glaze (for hyprpm, mock chroot has no network for FetchContent)
 tar -xzf %{SOURCE30}
@@ -340,7 +343,21 @@ cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$VENDOR_PREFIX
 cmake --install build
 popd
 
-# 10) Hyprland (needs -fpermissive for generated protocol code with zero-size arrays)
+# 10) Lua 5.5 (static, -fPIC; linked into Hyprland binary, no runtime dep)
+pushd lua-%{lua_ver}
+make MYCFLAGS="-fPIC" linux %{?_smp_mflags}
+make install INSTALL_TOP="$VENDOR_PREFIX" INSTALL_LIB="$VENDOR_PREFIX/lib64"
+mkdir -p "$VENDOR_PREFIX/lib64/pkgconfig"
+cat > "$VENDOR_PREFIX/lib64/pkgconfig/lua5.5.pc" << EOF
+Name: Lua
+Description: An Extensible Extension Language
+Version: %{lua_ver}
+Libs: -L$VENDOR_PREFIX/lib64 -llua -lm -ldl
+Cflags: -I$VENDOR_PREFIX/include
+EOF
+popd
+
+# 11) Hyprland (needs -fpermissive for generated protocol code with zero-size arrays)
 # Disable BUILD_TESTING to skip hyprtester (its plugin Makefile doesn't support vendored deps)
 # Set RPATH at build time to avoid patchelf corruption issues
 # Add vendor include path for glaze headers (start-hyprland uses direct #include, not find_package)
@@ -373,7 +390,7 @@ cmake --build build --parallel %{_smp_build_ncpus}
 # Note: start-hyprland is built via add_subdirectory(start) in main CMakeLists.txt
 # No separate build step needed - it inherits glaze and other settings from parent
 
-# 11) hyprlock (screen lock utility, needs OpenGL/EGL)
+# 12) hyprlock (screen lock utility, needs OpenGL/EGL)
 SUBPKG_RPATH='%{_libexecdir}/hyprland/vendor/lib64:%{_libexecdir}/hyprland/vendor/lib'
 pushd hyprlock-%{hyprlock_version}
 cmake -B build \
@@ -394,7 +411,7 @@ cmake -B build \
 cmake --build build --parallel %{_smp_build_ncpus}
 popd
 
-# 12) hypridle (idle daemon, no OpenGL needed)
+# 13) hypridle (idle daemon, no OpenGL needed)
 pushd hypridle-%{hypridle_version}
 cmake -B build \
   -DCMAKE_BUILD_TYPE=Release \
@@ -507,6 +524,7 @@ rm -rf %{buildroot}%{_datadir}/glaze
 - Update to Hyprland 0.55.0
 - Bump hyprutils 0.11.0 -> 0.13.1, hyprgraphics 0.5.0 -> 0.5.1
 - Bump hyprwire 0.3.0 -> 0.3.1, hyprwayland-scanner 0.4.5 -> 0.4.6, hyprlock 0.9.3 -> 0.9.5
+- Vendor Lua 5.5.0 (Hyprland 0.55.0 requires it; Fedora 43/44 ship 5.4)
 
 * Mon Apr 27 2026 Asher Buk <AshBuk@users.noreply.github.com> - 0.54.3-3
 - Bump aquamarine to 0.11.0

@@ -36,6 +36,7 @@ BUILD_ASSETS_RELEASE=$(parse_spec_global "$HYPRLAND_SPEC" "build_assets_release"
 # Subpackage versions (in hyprland-copr.spec)
 HYPRLOCK_VERSION=$(parse_spec_global "$HYPRLAND_SPEC" "hyprlock_version")
 HYPRIDLE_VERSION=$(parse_spec_global "$HYPRLAND_SPEC" "hypridle_version")
+LUA_VER=$(parse_spec_global "$HYPRLAND_SPEC" "lua_ver")
 
 # Satellite package versions (separate specs)
 PORTAL_VERSION=$(parse_spec_global "$SCRIPT_DIR/xdg-desktop-portal-hyprland.spec" "portal_version")
@@ -92,6 +93,8 @@ download "hyprlock-${HYPRLOCK_VERSION}.tar.gz" \
     "https://github.com/hyprwm/hyprlock/archive/refs/tags/v${HYPRLOCK_VERSION}.tar.gz"
 download "hypridle-${HYPRIDLE_VERSION}.tar.gz" \
     "https://github.com/hyprwm/hypridle/archive/refs/tags/v${HYPRIDLE_VERSION}.tar.gz"
+download "lua-${LUA_VER}.tar.gz" \
+    "https://www.lua.org/ftp/lua-${LUA_VER}.tar.gz"
 
 # --- Satellite package sources ---
 download "xdg-desktop-portal-hyprland-${PORTAL_VERSION}.tar.gz" \

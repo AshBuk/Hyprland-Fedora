@@ -5,18 +5,18 @@
 # =============================================================================
 # Version definitions (single source of truth)
 # =============================================================================
-%global hyprland_version        0.54.3
+%global hyprland_version        0.55.0
 %global hyprland_protocols_ver  0.7.0
-%global hyprwayland_scanner_ver 0.4.5
-%global hyprutils_ver           0.11.0
+%global hyprwayland_scanner_ver 0.4.6
+%global hyprutils_ver           0.13.1
 %global hyprlang_ver            0.6.8
 %global hyprcursor_ver          0.1.13
-%global hyprgraphics_ver        0.5.0
+%global hyprgraphics_ver        0.5.1
 %global aquamarine_ver          0.11.0
-%global hyprwire_ver            0.3.0
+%global hyprwire_ver            0.3.1
 %global glaze_ver               7.0.0
 # Subpackage versions
-%global hyprlock_version        0.9.3
+%global hyprlock_version        0.9.5
 %global hypridle_version        0.1.7
 
 # Build assets release (udis86, glaze tarballs - only changes when these deps update)
@@ -28,7 +28,7 @@
 
 Name:           hyprland
 Version:        %{hyprland_version}
-Release:        3%{?dist}
+Release:        1%{?dist}
 Summary:        Dynamic tiling Wayland compositor
 License:        BSD-3-Clause
 URL:            https://github.com/hyprwm/Hyprland
@@ -165,12 +165,9 @@ Recommends:     hypridle
 Hyprland is a dynamic tiling Wayland compositor with modern Wayland features,
 high customizability, IPC, plugins, and visual effects.
 
-This is a single-package COPR build for Fedora 43.
+This is a single-package COPR build for Fedora.
 Pinned Hyprland dependencies are built from fixed-version sources and installed
 into a private vendor prefix to avoid polluting system /usr/lib64.
-
-Note: Version 0.54.x removes togglesplit/swapsplit (use layoutmsg instead)
-and migrates single_window_aspect_ratio from dwindle to layout.
 
 # -----------------------------------------------------------------------------
 # Subpackage: hyprlock
@@ -506,6 +503,11 @@ rm -rf %{buildroot}%{_datadir}/glaze
 %{_datadir}/hypr/hypridle.conf
 
 %changelog
+* Sun May 10 2026 Asher Buk <AshBuk@users.noreply.github.com> - 0.55.0-1
+- Update to Hyprland 0.55.0
+- Bump hyprutils 0.11.0 -> 0.13.1, hyprgraphics 0.5.0 -> 0.5.1
+- Bump hyprwire 0.3.0 -> 0.3.1, hyprwayland-scanner 0.4.5 -> 0.4.6, hyprlock 0.9.3 -> 0.9.5
+
 * Mon Apr 27 2026 Asher Buk <AshBuk@users.noreply.github.com> - 0.54.3-3
 - Bump aquamarine to 0.11.0
 

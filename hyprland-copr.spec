@@ -345,7 +345,7 @@ popd
 
 # 10) Lua 5.5 (static, -fPIC; linked into Hyprland binary, no runtime dep)
 pushd lua-%{lua_ver}
-make MYCFLAGS="-fPIC" linux %{?_smp_mflags}
+make MYCFLAGS="-fPIC -fvisibility=hidden" linux %{?_smp_mflags}
 make install INSTALL_TOP="$VENDOR_PREFIX" INSTALL_LIB="$VENDOR_PREFIX/lib64"
 mkdir -p "$VENDOR_PREFIX/lib64/pkgconfig"
 cat > "$VENDOR_PREFIX/lib64/pkgconfig/lua5.5.pc" << EOF

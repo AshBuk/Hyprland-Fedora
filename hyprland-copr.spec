@@ -30,7 +30,7 @@
 
 Name:           hyprland
 Version:        %{hyprland_version}
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Dynamic tiling Wayland compositor
 License:        BSD-3-Clause
 URL:            https://github.com/hyprwm/Hyprland
@@ -520,6 +520,9 @@ rm -rf %{buildroot}%{_datadir}/glaze
 %{_datadir}/hypr/hypridle.conf
 
 %changelog
+* Sun May 10 2026 Asher Buk <AshBuk@users.noreply.github.com> - 0.55.0-2
+- Hide vendored Lua symbols to prevent clash with system liblua-5.4
+
 * Sun May 10 2026 Asher Buk <AshBuk@users.noreply.github.com> - 0.55.0-1
 - Update to Hyprland 0.55.0
 - Bump hyprutils 0.11.0 -> 0.13.1, hyprgraphics 0.5.0 -> 0.5.1

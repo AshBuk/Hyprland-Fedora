@@ -19,7 +19,9 @@
 %global lua_ver                 5.5.0
 # Subpackage versions
 %global hyprlock_version        0.9.5
+%global hyprlock_release        1
 %global hypridle_version        0.1.7
+%global hypridle_release        4
 
 # Build assets release (udis86, glaze tarballs - only changes when these deps update)
 %global build_assets_release    v0.54-fedora
@@ -30,7 +32,7 @@
 
 Name:           hyprland
 Version:        %{hyprland_version}
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        Dynamic tiling Wayland compositor
 License:        BSD-3-Clause
 URL:            https://github.com/hyprwm/Hyprland
@@ -176,6 +178,7 @@ into a private vendor prefix to avoid polluting system /usr/lib64.
 # -----------------------------------------------------------------------------
 %package -n hyprlock
 Version:        %{hyprlock_version}
+Release:        %{hyprlock_release}%{?dist}
 Summary:        Hyprland screen lock utility
 License:        BSD-3-Clause
 Requires:       hyprland >= %{hyprland_version}
@@ -191,6 +194,7 @@ and provides a customizable lock screen with widgets and effects.
 # -----------------------------------------------------------------------------
 %package -n hypridle
 Version:        %{hypridle_version}
+Release:        %{hypridle_release}%{?dist}
 Summary:        Hyprland idle daemon
 License:        BSD-3-Clause
 Requires:       hyprland >= %{hyprland_version}

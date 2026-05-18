@@ -5,7 +5,7 @@
 # =============================================================================
 # Version definitions (single source of truth)
 # =============================================================================
-%global hyprland_version        0.55.1
+%global hyprland_version        0.55.2
 %global hyprland_protocols_ver  0.7.0
 %global hyprwayland_scanner_ver 0.4.6
 %global hyprutils_ver           0.13.1
@@ -524,6 +524,9 @@ rm -rf %{buildroot}%{_datadir}/glaze
 %{_datadir}/hypr/hypridle.conf
 
 %changelog
+* Mon May 18 2026 Asher Buk <AshBuk@users.noreply.github.com> - 0.55.2-1
+- Update to Hyprland 0.55.2 (patch release)
+
 * Thu May 14 2026 Asher Buk <AshBuk@users.noreply.github.com> - 0.55.1-1
 - Update to Hyprland 0.55.1 (patch release)
 

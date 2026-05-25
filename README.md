@@ -73,7 +73,7 @@ libaquamarine, libhyprlang, libhyprutils, libhyprcursor, libhyprgraphics, libhyp
 - [COPR Repository](https://copr.fedorainfracloud.org/coprs/ashbuk/Hyprland-Fedora/)
 - [Upstream Hyprland](https://github.com/hyprwm/Hyprland)
 - [Hyprland Wiki](https://wiki.hyprland.org/)
-- [Tech write-up](https://ashbuk.hashnode.dev/hyprland-fedora)
+- [Article](https://ashbuk.dev/posts/hyprland-055/)
 
 ---
 

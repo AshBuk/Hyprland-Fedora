@@ -5,14 +5,14 @@
 # =============================================================================
 # Version definitions (single source of truth)
 # =============================================================================
-%global hyprland_version        0.55.2
+%global hyprland_version        0.55.3
 %global hyprland_protocols_ver  0.7.0
 %global hyprwayland_scanner_ver 0.4.6
 %global hyprutils_ver           0.13.1
 %global hyprlang_ver            0.6.8
 %global hyprcursor_ver          0.1.13
 %global hyprgraphics_ver        0.5.1
-%global aquamarine_ver          0.11.0
+%global aquamarine_ver          0.12.0
 %global hyprwire_ver            0.3.1
 %global glaze_ver               7.0.0
 # Lua 5.5 (Hyprland 0.55.0+ requires >= 5.5; Fedora 43/44 ship 5.4.8)
@@ -524,6 +524,10 @@ rm -rf %{buildroot}%{_datadir}/glaze
 %{_datadir}/hypr/hypridle.conf
 
 %changelog
+* Sun Jun 07 2026 Asher Buk <AshBuk@users.noreply.github.com> - 0.55.3-1
+- Update to Hyprland 0.55.3 (patch release)
+- Bump aquamarine 0.11.0 -> 0.12.0 (ABI changes; rebuilt against vendored lib)
+
 * Mon May 18 2026 Asher Buk <AshBuk@users.noreply.github.com> - 0.55.2-1
 - Update to Hyprland 0.55.2 (patch release)
 

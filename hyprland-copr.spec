@@ -5,7 +5,7 @@
 # =============================================================================
 # Version definitions (single source of truth)
 # =============================================================================
-%global hyprland_version        0.55.3
+%global hyprland_version        0.55.4
 %global hyprland_protocols_ver  0.7.0
 %global hyprwayland_scanner_ver 0.4.6
 %global hyprutils_ver           0.13.1
@@ -524,6 +524,9 @@ rm -rf %{buildroot}%{_datadir}/glaze
 %{_datadir}/hypr/hypridle.conf
 
 %changelog
+* Sun Jun 14 2026 Asher Buk <AshBuk@users.noreply.github.com> - 0.55.4-1
+- Update to Hyprland 0.55.4 (patch release)
+
 * Sun Jun 07 2026 Asher Buk <AshBuk@users.noreply.github.com> - 0.55.3-1
 - Update to Hyprland 0.55.3 (patch release)
 - Bump aquamarine 0.11.0 -> 0.12.0 (ABI changes; rebuilt against vendored lib)

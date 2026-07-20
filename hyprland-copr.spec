@@ -87,6 +87,8 @@ BuildRequires:  libglvnd-gles
 BuildRequires:  libinput-devel >= 1.29
 # NEW: libeis for input-capture protocol (0.56.0)
 BuildRequires:  libeis-devel
+# NEW: readline for hyprctl Lua REPL (0.56.0)
+BuildRequires:  readline-devel
 BuildRequires:  libjxl-devel
 BuildRequires:  libliftoff-devel
 BuildRequires:  libspng-devel
@@ -138,6 +140,8 @@ Requires:       mesa-libgbm
 Requires:       libinput >= 1.29
 # NEW: libeis for input-capture protocol (0.56.0)
 Requires:       libeis
+# NEW: readline for hyprctl Lua REPL (0.56.0)
+Requires:       readline
 Requires:       libjxl
 Requires:       libliftoff
 Requires:       libspng

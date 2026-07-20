@@ -63,10 +63,10 @@ Source30:       https://github.com/AshBuk/Hyprland-Fedora/releases/download/%{bu
 Source40:       https://github.com/hyprwm/hyprlock/archive/refs/tags/v%{hyprlock_version}.tar.gz#/hyprlock-%{hyprlock_version}.tar.gz
 Source41:       https://github.com/hyprwm/hypridle/archive/refs/tags/v%{hypridle_version}.tar.gz#/hypridle-%{hypridle_version}.tar.gz
 
-# Downstream compatibility patches
+# Downstream compatibility patches (hosted in our release mirror)
 # Fedora 43 (GCC 15) lacks std::ranges::starts_with (libstdc++ ships it from GCC 16).
 # Drop once Fedora 43 reaches EOL.
-Patch0:         hyprland-%{hyprland_version}-ranges-starts-with-gcc15.patch
+Patch0:         https://github.com/AshBuk/Hyprland-Fedora/releases/download/%{build_assets_release}/hyprland-%{hyprland_version}-ranges-starts-with-gcc15.patch
 
 # Build dependencies
 BuildRequires:  cmake

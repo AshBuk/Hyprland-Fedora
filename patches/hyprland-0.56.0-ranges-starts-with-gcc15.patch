@@ -1,0 +1,27 @@
+Subject: Build fix for GCC 15 (Fedora 43): avoid std::ranges::starts_with
+
+std::ranges::starts_with is a C++23 range algorithm that libstdc++ only
+ships from GCC 16 onward. Fedora 43 stays on GCC 15 for its whole life, so
+the compositor fails to build there ("'starts_with' is not a member of
+'std::ranges'"). Fedora 44 (GCC 16) is unaffected.
+
+str_view here is a lazy std::views::transform view (lowercased input), not a
+std::string, so the string_view member .starts_with() is not available. Use
+an equivalent expressed with std::ranges::mismatch, which is C++20 and works
+on arbitrary ranges: the second range is fully consumed iff str_view starts
+with it.
+
+Upstream targets GCC 16 and considers the original valid C++23, so this is a
+downstream compatibility shim. Drop this patch once Fedora 43 reaches EOL.
+
+--- a/src/helpers/MiscFunctions.cpp	2026-07-21 00:18:49.021242466 +0300
++++ b/src/helpers/MiscFunctions.cpp	2026-07-21 00:18:49.032084614 +0300
+@@ -838,7 +838,7 @@
+     });
+ 
+     return [&](auto&&... prefixes) -> bool {
+-        return (... || std::ranges::starts_with(str_view, prefixes));
++        return (... || (std::ranges::mismatch(str_view, prefixes).in2 == std::ranges::end(prefixes)));
+     }("true"sv, "yes"sv, "on"sv);
+     // clang-format on
+ }

@@ -121,6 +121,14 @@ download "hyprwire-${HYPRWIRE_VER}.tar.gz" \
 cd ..
 
 # =============================================================================
+# Stage downstream patches (tracked in git; sources/ is gitignored)
+# =============================================================================
+if compgen -G "patches/*.patch" > /dev/null; then
+    echo "=== Staging patches ==="
+    cp -v patches/*.patch sources/
+fi
+
+# =============================================================================
 # Build SRPMs
 # =============================================================================
 # Determine which specs to build

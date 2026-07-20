@@ -5,14 +5,14 @@
 # =============================================================================
 # Version definitions (single source of truth)
 # =============================================================================
-%global hyprland_version        0.55.4
+%global hyprland_version        0.56.0
 %global hyprland_protocols_ver  0.7.0
 %global hyprwayland_scanner_ver 0.4.6
 %global hyprutils_ver           0.13.1
 %global hyprlang_ver            0.6.8
 %global hyprcursor_ver          0.1.13
 %global hyprgraphics_ver        0.5.1
-%global aquamarine_ver          0.12.0
+%global aquamarine_ver          0.13.0
 %global hyprwire_ver            0.3.1
 %global glaze_ver               7.0.0
 # Lua 5.5 (Hyprland 0.55.0+ requires >= 5.5; Fedora 43/44 ship 5.4.8)
@@ -84,7 +84,7 @@ BuildRequires:  mesa-libgbm-devel
 BuildRequires:  mesa-libEGL-devel
 BuildRequires:  libglvnd-devel
 BuildRequires:  libglvnd-gles
-BuildRequires:  libinput-devel
+BuildRequires:  libinput-devel >= 1.29
 BuildRequires:  libjxl-devel
 BuildRequires:  libliftoff-devel
 BuildRequires:  libspng-devel
@@ -133,7 +133,7 @@ Requires:       libdisplay-info
 Requires:       libdrm
 Requires:       libepoxy
 Requires:       mesa-libgbm
-Requires:       libinput
+Requires:       libinput >= 1.29
 Requires:       libjxl
 Requires:       libliftoff
 Requires:       libspng
@@ -524,6 +524,9 @@ rm -rf %{buildroot}%{_datadir}/glaze
 %{_datadir}/hypr/hypridle.conf
 
 %changelog
+* Mon Jul 20 2026 Asher Buk <AshBuk@users.noreply.github.com> - 0.56.0-1
+- Update to Hyprland 0.56.0, Aquamarine 0.12.0 -> 0.13.0
+
 * Sun Jun 14 2026 Asher Buk <AshBuk@users.noreply.github.com> - 0.55.4-1
 - Update to Hyprland 0.55.4 (patch release)
 

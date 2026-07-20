@@ -1,3 +1,4 @@
 # SRPM build artifacts
 sources/
 srpm/
+.claude

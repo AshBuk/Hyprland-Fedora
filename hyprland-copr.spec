@@ -85,6 +85,8 @@ BuildRequires:  mesa-libEGL-devel
 BuildRequires:  libglvnd-devel
 BuildRequires:  libglvnd-gles
 BuildRequires:  libinput-devel >= 1.29
+# NEW: libeis for input-capture protocol (0.56.0)
+BuildRequires:  libeis-devel
 BuildRequires:  libjxl-devel
 BuildRequires:  libliftoff-devel
 BuildRequires:  libspng-devel
@@ -134,6 +136,8 @@ Requires:       libdrm
 Requires:       libepoxy
 Requires:       mesa-libgbm
 Requires:       libinput >= 1.29
+# NEW: libeis for input-capture protocol (0.56.0)
+Requires:       libeis
 Requires:       libjxl
 Requires:       libliftoff
 Requires:       libspng
@@ -526,6 +530,8 @@ rm -rf %{buildroot}%{_datadir}/glaze
 %changelog
 * Mon Jul 20 2026 Asher Buk <AshBuk@users.noreply.github.com> - 0.56.0-1
 - Update to Hyprland 0.56.0, Aquamarine 0.12.0 -> 0.13.0
+- Add libeis dependency (new input-capture protocol)
+- Require libinput >= 1.29 (upstream minimum bumped 1.28 -> 1.29)
 
 * Sun Jun 14 2026 Asher Buk <AshBuk@users.noreply.github.com> - 0.55.4-1
 - Update to Hyprland 0.55.4 (patch release)

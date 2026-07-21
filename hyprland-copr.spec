@@ -14,7 +14,7 @@
 %global hyprgraphics_ver        0.5.1
 %global aquamarine_ver          0.13.0
 %global hyprwire_ver            0.3.1
-%global glaze_ver               7.0.0
+%global glaze_ver               7.2.0
 # Lua 5.5 (Hyprland 0.55.0+ requires >= 5.5; Fedora 43/44 ship 5.4.8)
 %global lua_ver                 5.5.0
 # Subpackage versions
@@ -32,7 +32,7 @@
 
 Name:           hyprland
 Version:        %{hyprland_version}
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Dynamic tiling Wayland compositor
 License:        BSD-3-Clause
 URL:            https://github.com/hyprwm/Hyprland
@@ -218,7 +218,12 @@ actions on inactivity timeouts, such as locking the screen, turning off
 the display, or suspending the system.
 
 %prep
-%autosetup -p1 -n Hyprland-%{hyprland_version}
+# -N: don't auto-apply patches; Patch0 is gated to Fedora 43 and older (GCC < 16),
+# which lack std::ranges::starts_with. Fedora 44+ builds the upstream code unchanged.
+%autosetup -N -n Hyprland-%{hyprland_version}
+%if 0%{?fedora} <= 43
+%patch -P 0 -p1
+%endif
 
 # Unpack submodules into correct locations
 rm -rf subprojects/hyprland-protocols subprojects/udis86
@@ -537,6 +542,10 @@ rm -rf %{buildroot}%{_datadir}/glaze
 %{_datadir}/hypr/hypridle.conf
 
 %changelog
+* Tue Jul 21 2026 Asher Buk <AshBuk@users.noreply.github.com> - 0.56.0-2
+- Bump glaze 7.0.0 -> 7.2.0 to match upstream's tested build
+- Apply the GCC 15 std::ranges::starts_with patch only on Fedora <= 43
+
 * Mon Jul 20 2026 Asher Buk <AshBuk@users.noreply.github.com> - 0.56.0-1
 - Update to Hyprland 0.56.0, Aquamarine 0.12.0 -> 0.13.0
 - Add libeis dependency (new input-capture protocol)

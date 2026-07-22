@@ -26,6 +26,9 @@
 # Build assets release (udis86, glaze tarballs - only changes when these deps update)
 %global build_assets_release    v0.54-fedora
 
+# Disable LTO: GCC LTO miscompiles 0.56.0 Desktop::View (null vtable -> crash)
+%global _lto_cflags %{nil}
+
 # Exclude auto-requires for vendored Hyprland libraries
 # These are built from source and installed in /usr/libexec/hyprland/vendor/
 %global __requires_exclude pkgconfig\\((aquamarine|hyprutils|hyprlang|hyprcursor|hyprgraphics|hyprwayland-scanner|hyprland-protocols|hyprwire)\\)
@@ -550,6 +553,7 @@ rm -rf %{buildroot}%{_datadir}/glaze
 * Thu Jul 23 2026 Asher Buk <AshBuk@users.noreply.github.com> - 0.56.0-1
 - Update to Hyprland 0.56.0, Aquamarine 0.12.0 -> 0.13.0
 - Bump glaze 7.0.0 -> 7.2.0 to match upstream's tested build
+- Disable LTO (GCC miscompiles Desktop::View, crashing on layer surfaces)
 
 * Sun Jun 14 2026 Asher Buk <AshBuk@users.noreply.github.com> - 0.55.4-1
 - Update to Hyprland 0.55.4 (patch release)

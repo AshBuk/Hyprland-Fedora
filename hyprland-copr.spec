@@ -32,7 +32,7 @@
 
 Name:           hyprland
 Version:        %{hyprland_version}
-Release:        2%{?dist}
+Release:        1%{?dist}
 Summary:        Dynamic tiling Wayland compositor
 License:        BSD-3-Clause
 URL:            https://github.com/hyprwm/Hyprland
@@ -295,7 +295,8 @@ ls -la "$VENDOR_PREFIX/lib64/cmake/hyprwayland-scanner/" || ls -la "$VENDOR_PREF
 # 2) hyprutils
 pushd hyprutils-%{hyprutils_ver}
 cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$VENDOR_PREFIX" \
-  -DCMAKE_PREFIX_PATH="$VENDOR_PREFIX" -DCMAKE_INSTALL_LIBDIR=lib64
+  -DCMAKE_PREFIX_PATH="$VENDOR_PREFIX" -DCMAKE_INSTALL_LIBDIR=lib64 \
+  -DCMAKE_CXX_FLAGS="$GCC15_CXXFLAGS"
 cmake --build build --parallel %{_smp_build_ncpus}
 cmake --install build
 popd
@@ -303,7 +304,8 @@ popd
 # 3) hyprlang
 pushd hyprlang-%{hyprlang_ver}
 cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$VENDOR_PREFIX" \
-  -DCMAKE_PREFIX_PATH="$VENDOR_PREFIX" -DCMAKE_INSTALL_LIBDIR=lib64
+  -DCMAKE_PREFIX_PATH="$VENDOR_PREFIX" -DCMAKE_INSTALL_LIBDIR=lib64 \
+  -DCMAKE_CXX_FLAGS="$GCC15_CXXFLAGS"
 cmake --build build --parallel %{_smp_build_ncpus}
 cmake --install build
 popd
@@ -311,7 +313,8 @@ popd
 # 4) hyprcursor
 pushd hyprcursor-%{hyprcursor_ver}
 cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$VENDOR_PREFIX" \
-  -DCMAKE_PREFIX_PATH="$VENDOR_PREFIX" -DCMAKE_INSTALL_LIBDIR=lib64
+  -DCMAKE_PREFIX_PATH="$VENDOR_PREFIX" -DCMAKE_INSTALL_LIBDIR=lib64 \
+  -DCMAKE_CXX_FLAGS="$GCC15_CXXFLAGS"
 cmake --build build --parallel %{_smp_build_ncpus}
 cmake --install build
 popd
@@ -319,7 +322,8 @@ popd
 # 5) hyprgraphics
 pushd hyprgraphics-%{hyprgraphics_ver}
 cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$VENDOR_PREFIX" \
-  -DCMAKE_PREFIX_PATH="$VENDOR_PREFIX" -DCMAKE_INSTALL_LIBDIR=lib64
+  -DCMAKE_PREFIX_PATH="$VENDOR_PREFIX" -DCMAKE_INSTALL_LIBDIR=lib64 \
+  -DCMAKE_CXX_FLAGS="$GCC15_CXXFLAGS"
 cmake --build build --parallel %{_smp_build_ncpus}
 cmake --install build
 popd
@@ -346,7 +350,8 @@ popd
 # 7) hyprwire (IPC library + scanner for hyprctl)
 pushd hyprwire-%{hyprwire_ver}
 cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$VENDOR_PREFIX" \
-  -DCMAKE_PREFIX_PATH="$VENDOR_PREFIX" -DCMAKE_INSTALL_LIBDIR=lib64
+  -DCMAKE_PREFIX_PATH="$VENDOR_PREFIX" -DCMAKE_INSTALL_LIBDIR=lib64 \
+  -DCMAKE_CXX_FLAGS="$GCC15_CXXFLAGS"
 cmake --build build --parallel %{_smp_build_ncpus}
 cmake --install build
 popd
@@ -542,14 +547,9 @@ rm -rf %{buildroot}%{_datadir}/glaze
 %{_datadir}/hypr/hypridle.conf
 
 %changelog
-* Tue Jul 21 2026 Asher Buk <AshBuk@users.noreply.github.com> - 0.56.0-2
-- Bump glaze 7.0.0 -> 7.2.0 to match upstream's tested build
-- Apply the GCC 15 std::ranges::starts_with patch only on Fedora <= 43
-
-* Mon Jul 20 2026 Asher Buk <AshBuk@users.noreply.github.com> - 0.56.0-1
+* Thu Jul 23 2026 Asher Buk <AshBuk@users.noreply.github.com> - 0.56.0-1
 - Update to Hyprland 0.56.0, Aquamarine 0.12.0 -> 0.13.0
-- Add libeis dependency (new input-capture protocol)
-- Require libinput >= 1.29 (upstream minimum bumped 1.28 -> 1.29)
+- Bump glaze 7.0.0 -> 7.2.0 to match upstream's tested build
 
 * Sun Jun 14 2026 Asher Buk <AshBuk@users.noreply.github.com> - 0.55.4-1
 - Update to Hyprland 0.55.4 (patch release)

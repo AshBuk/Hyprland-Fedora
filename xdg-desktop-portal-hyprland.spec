@@ -8,7 +8,7 @@
 %global portal_version          1.3.12
 %global hyprland_min_ver        0.55.0
 %global hyprwayland_scanner_ver 0.4.6
-%global hyprutils_ver           0.13.1
+%global hyprutils_ver           0.14.0
 %global hyprlang_ver            0.6.8
 %global hyprland_protocols_ver  0.7.0
 

@@ -18,7 +18,7 @@
 # Lua 5.5 (Hyprland 0.55.0+ requires >= 5.5; Fedora 43/44 ship 5.4.8)
 %global lua_ver                 5.5.0
 # Subpackage versions
-%global hyprlock_version        0.9.5
+%global hyprlock_version        0.9.6
 %global hyprlock_release        1
 %global hypridle_version        0.1.7
 %global hypridle_release        4
@@ -546,6 +546,7 @@ rm -rf %{buildroot}%{_datadir}/glaze
 - Update to Hyprland 0.56.0, Aquamarine 0.12.0 -> 0.13.0
 - Bump glaze 7.0.0 -> 7.2.0 to match upstream's tested build
 - Bump hyprutils 0.13.1 -> 0.14.0 (fixes virtual-inheritance cast crash on layer surfaces)
+- Bump hyprlock 0.9.5 -> 0.9.6 (hyprutils 0.14.0 compat)
 
 * Sun Jun 14 2026 Asher Buk <AshBuk@users.noreply.github.com> - 0.55.4-1
 - Update to Hyprland 0.55.4 (patch release)

@@ -42,6 +42,7 @@ BuildRequires:  pixman-devel
 BuildRequires:  pipewire-devel >= 1.1.82
 BuildRequires:  sdbus-cpp-devel >= 2.0.0
 BuildRequires:  libdrm-devel
+BuildRequires:  libuuid-devel
 BuildRequires:  mesa-libgbm-devel
 BuildRequires:  wayland-devel
 BuildRequires:  wayland-protocols-devel
@@ -149,7 +150,7 @@ done
 %{_userunitdir}/xdg-desktop-portal-hyprland.service
 
 %changelog
-* Wed Jul 23 2026 Asher Buk <AshBuk@users.noreply.github.com> - 1.4.0-1
+* Thu Jul 23 2026 Asher Buk <AshBuk@users.noreply.github.com> - 1.4.0-1
 - Update to xdg-desktop-portal-hyprland 1.4.0 (hyprutils 0.14.0 compat)
 
 * Sun Jun 07 2026 Asher Buk <AshBuk@users.noreply.github.com> - 1.3.12-1

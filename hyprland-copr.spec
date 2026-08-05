@@ -5,14 +5,14 @@
 # =============================================================================
 # Version definitions (single source of truth)
 # =============================================================================
-%global hyprland_version        0.56.0
+%global hyprland_version        0.56.2
 %global hyprland_protocols_ver  0.7.0
 %global hyprwayland_scanner_ver 0.4.6
 %global hyprutils_ver           0.14.0
 %global hyprlang_ver            0.6.8
 %global hyprcursor_ver          0.1.13
 %global hyprgraphics_ver        0.5.1
-%global aquamarine_ver          0.13.0
+%global aquamarine_ver          0.14.0
 %global hyprwire_ver            0.3.1
 %global glaze_ver               7.2.0
 # Lua 5.5 (Hyprland 0.55.0+ requires >= 5.5; Fedora 43/44 ship 5.4.8)
@@ -20,8 +20,8 @@
 # Subpackage versions
 %global hyprlock_version        0.9.6
 %global hyprlock_release        1
-%global hypridle_version        0.1.7
-%global hypridle_release        4
+%global hypridle_version        0.1.8
+%global hypridle_release        1
 
 # Build assets release (udis86, glaze tarballs - only changes when these deps update)
 %global build_assets_release    v0.54-fedora
@@ -66,7 +66,9 @@ Source41:       https://github.com/hyprwm/hypridle/archive/refs/tags/v%{hypridle
 # Downstream compatibility patches (hosted in our release mirror)
 # Fedora 43 (GCC 15) lacks std::ranges::starts_with (libstdc++ ships it from GCC 16).
 # Drop once Fedora 43 reaches EOL.
-Patch0:         https://github.com/AshBuk/Hyprland-Fedora/releases/download/%{build_assets_release}/hyprland-%{hyprland_version}-ranges-starts-with-gcc15.patch
+# Version the patch was cut against, not the one being built: still applies as-is.
+%global gcc15_patch_ver 0.56.0
+Patch0:         https://github.com/AshBuk/Hyprland-Fedora/releases/download/%{build_assets_release}/hyprland-%{gcc15_patch_ver}-ranges-starts-with-gcc15.patch
 
 # Build dependencies
 BuildRequires:  cmake
@@ -542,6 +544,11 @@ rm -rf %{buildroot}%{_datadir}/glaze
 %{_datadir}/hypr/hypridle.conf
 
 %changelog
+* Thu Aug 06 2026 Asher Buk <AshBuk@users.noreply.github.com> - 0.56.2-1
+- Update to Hyprland 0.56.2
+- Bump aquamarine 0.13.0 -> 0.14.0 (ABI break, SOVERSION 12 -> 13)
+- Bump hypridle 0.1.7 -> 0.1.8
+
 * Thu Jul 23 2026 Asher Buk <AshBuk@users.noreply.github.com> - 0.56.0-1
 - Update to Hyprland 0.56.0, Aquamarine 0.12.0 -> 0.13.0
 - Bump glaze 7.0.0 -> 7.2.0 to match upstream's tested build

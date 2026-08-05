@@ -5,7 +5,7 @@
 # =============================================================================
 # Version definitions
 # =============================================================================
-%global portal_version          1.4.0
+%global portal_version          1.4.1
 %global hyprland_min_ver        0.55.0
 %global hyprwayland_scanner_ver 0.4.6
 %global hyprutils_ver           0.14.0
@@ -150,6 +150,9 @@ done
 %{_userunitdir}/xdg-desktop-portal-hyprland.service
 
 %changelog
+* Thu Aug 06 2026 Asher Buk <AshBuk@users.noreply.github.com> - 1.4.1-1
+- Update to xdg-desktop-portal-hyprland 1.4.1
+
 * Thu Jul 23 2026 Asher Buk <AshBuk@users.noreply.github.com> - 1.4.0-1
 - Update to xdg-desktop-portal-hyprland 1.4.0 (hyprutils 0.14.0 compat)
 

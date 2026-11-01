@@ -124,7 +124,7 @@ export CMAKE_PREFIX_PATH="$VENDOR_PREFIX"
 for dep in hyprwayland-scanner-%{hyprwayland_scanner_ver} hyprutils-%{hyprutils_ver} hyprlang-%{hyprlang_ver}; do
   pushd $dep
   cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$VENDOR_PREFIX" \
-    -DCMAKE_INSTALL_LIBDIR=lib64
+    -DCMAKE_INSTALL_LIBDIR=lib64 -DBUILD_TESTING=OFF
   cmake --build build --parallel %{_smp_build_ncpus}
   cmake --install build
   popd
@@ -140,7 +140,7 @@ popd
 for dep in aquamarine-%{aquamarine_ver} hyprgraphics-%{hyprgraphics_ver} hyprtoolkit-%{hyprtoolkit_ver}; do
   pushd $dep
   cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$VENDOR_PREFIX" \
-    -DCMAKE_INSTALL_LIBDIR=lib64 \
+    -DCMAKE_INSTALL_LIBDIR=lib64 -DBUILD_TESTING=OFF \
     -DOpenGL_GL_PREFERENCE=GLVND \
     -DOPENGL_opengl_LIBRARY=%{_libdir}/libOpenGL.so \
     -DOPENGL_gles3_LIBRARY=%{_libdir}/libGLESv2.so \

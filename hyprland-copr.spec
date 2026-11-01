@@ -269,7 +269,7 @@ for dep in hyprwayland-scanner-%{hyprwayland_scanner_ver} hyprutils-%{hyprutils_
            hyprcursor-%{hyprcursor_ver} hyprgraphics-%{hyprgraphics_ver} hyprwire-%{hyprwire_ver}; do
   pushd $dep
   cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$VENDOR_PREFIX" \
-    -DCMAKE_INSTALL_LIBDIR=lib64
+    -DCMAKE_INSTALL_LIBDIR=lib64 -DBUILD_TESTING=OFF
   cmake --build build --parallel %{_smp_build_ncpus}
   cmake --install build
   popd
@@ -279,7 +279,7 @@ done
 for dep in aquamarine-%{aquamarine_ver} hyprtoolkit-%{hyprtoolkit_ver}; do
   pushd $dep
   cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$VENDOR_PREFIX" \
-    -DCMAKE_INSTALL_LIBDIR=lib64 \
+    -DCMAKE_INSTALL_LIBDIR=lib64 -DBUILD_TESTING=OFF \
     $GL_FLAGS
   cmake --build build --parallel %{_smp_build_ncpus}
   cmake --install build

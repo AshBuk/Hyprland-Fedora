@@ -93,9 +93,9 @@ BuildRequires:  mesa-libEGL-devel
 BuildRequires:  libglvnd-devel
 BuildRequires:  libglvnd-gles
 BuildRequires:  libinput-devel >= 1.29
-# NEW: libeis for input-capture protocol (0.56.0)
+# libeis for input-capture protocol
 BuildRequires:  libeis-devel
-# NEW: readline for hyprctl Lua REPL (0.56.0)
+# readline for hyprctl Lua REPL
 BuildRequires:  readline-devel
 BuildRequires:  libjxl-devel
 BuildRequires:  libliftoff-devel
@@ -130,13 +130,13 @@ BuildRequires:  libXfont2-devel
 BuildRequires:  xkeyboard-config
 BuildRequires:  glib2-devel
 BuildRequires:  libuuid-devel
-# NEW: libffi for hyprwire
+# libffi for hyprwire
 BuildRequires:  libffi-devel
-# NEW: muparser for math expressions in config (0.53.0)
+# muparser for math expressions in config
 BuildRequires:  muParser-devel
-# NEW: libcanberra for bell sounds (0.57.0)
+# libcanberra for bell sounds
 BuildRequires:  libcanberra-devel
-# NEW: iniparser, abseil for hyprtoolkit
+# iniparser, abseil for hyprtoolkit
 BuildRequires:  iniparser-devel
 BuildRequires:  abseil-cpp-devel
 # Subpackage deps (hyprlock: PAM auth); D-Bus IPC for hyprlock, hypridle and Hyprland rtkit (0.57.0)
@@ -151,9 +151,9 @@ Requires:       libdrm
 Requires:       libepoxy
 Requires:       mesa-libgbm
 Requires:       libinput >= 1.29
-# NEW: libeis for input-capture protocol (0.56.0)
+# libeis for input-capture protocol
 Requires:       libeis
-# NEW: readline for hyprctl Lua REPL (0.56.0)
+# readline for hyprctl Lua REPL
 Requires:       readline
 Requires:       libjxl
 Requires:       libliftoff
@@ -178,16 +178,16 @@ Requires:       xcb-util-image
 Requires:       xcb-util-renderutil
 Requires:       xcb-util-wm
 Requires:       xorg-x11-server-Xwayland
-# NEW: libffi for hyprwire runtime
+# libffi for hyprwire runtime
 Requires:       libffi
-# NEW: muparser for math expressions in config (0.53.0)
+# muparser for math expressions in config
 Requires:       muParser
-# NEW: libcanberra for bell sounds (0.57.0)
+# libcanberra for bell sounds
 Requires:       libcanberra
-# NEW: sdbus-cpp for rtkit realtime scheduling (0.57.0)
+# sdbus-cpp for rtkit realtime scheduling
 Requires:       sdbus-cpp
 Recommends:     rtkit
-# NEW: iniparser, abseil for hyprtoolkit
+# iniparser, abseil for hyprtoolkit
 Requires:       iniparser
 Requires:       abseil-cpp
 # Subpackages (installed by default via weak deps, removable individually)
@@ -290,12 +290,13 @@ GCC15_CXXFLAGS="%{optflags} -fpermissive"
 
 # OpenGL/GLES3/EGL detection: CMake FindOpenGL needs explicit hints for libglvnd on Fedora
 # libglvnd provides libGLESv2.so (GLES2/3), libEGL.so, and libOpenGL.so
-export OPENGL_opengl_LIBRARY=%{_libdir}/libOpenGL.so
-export OPENGL_gles3_LIBRARY=%{_libdir}/libGLESv2.so
-export OPENGL_GLES3_INCLUDE_DIR=/usr/include
-export OPENGL_egl_LIBRARY=%{_libdir}/libEGL.so
-export OPENGL_EGL_INCLUDE_DIR=/usr/include
-export OPENGL_INCLUDE_DIR=/usr/include
+GL_FLAGS="-DOpenGL_GL_PREFERENCE=GLVND \
+  -DOPENGL_opengl_LIBRARY=%{_libdir}/libOpenGL.so \
+  -DOPENGL_gles3_LIBRARY=%{_libdir}/libGLESv2.so \
+  -DOPENGL_GLES3_INCLUDE_DIR=/usr/include \
+  -DOPENGL_egl_LIBRARY=%{_libdir}/libEGL.so \
+  -DOPENGL_EGL_INCLUDE_DIR=/usr/include \
+  -DOPENGL_INCLUDE_DIR=/usr/include"
 
 # 1) hyprwayland-scanner (build tool)
 pushd hyprwayland-scanner-%{hyprwayland_scanner_ver}
@@ -348,13 +349,7 @@ cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$VENDOR_PREFIX
   -DCMAKE_PREFIX_PATH="$VENDOR_PREFIX" -DCMAKE_INSTALL_LIBDIR=lib64 \
   -Dhyprwayland-scanner_DIR="$VENDOR_PREFIX/lib64/cmake/hyprwayland-scanner" \
   -DCMAKE_CXX_FLAGS="$GCC15_CXXFLAGS" \
-  -DOpenGL_GL_PREFERENCE=GLVND \
-  -DOPENGL_opengl_LIBRARY=%{_libdir}/libOpenGL.so \
-  -DOPENGL_gles3_LIBRARY=%{_libdir}/libGLESv2.so \
-  -DOPENGL_GLES3_INCLUDE_DIR=/usr/include \
-  -DOPENGL_egl_LIBRARY=%{_libdir}/libEGL.so \
-  -DOPENGL_EGL_INCLUDE_DIR=/usr/include \
-  -DOPENGL_INCLUDE_DIR=/usr/include
+  $GL_FLAGS
 cmake --build build --parallel %{_smp_build_ncpus}
 cmake --install build
 popd
@@ -400,13 +395,7 @@ cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$VENDOR_PREFIX
   -DCMAKE_PREFIX_PATH="$VENDOR_PREFIX" -DCMAKE_INSTALL_LIBDIR=lib64 \
   -Dhyprwayland-scanner_DIR="$VENDOR_PREFIX/lib64/cmake/hyprwayland-scanner" \
   -DCMAKE_CXX_FLAGS="$GCC15_CXXFLAGS" \
-  -DOpenGL_GL_PREFERENCE=GLVND \
-  -DOPENGL_opengl_LIBRARY=%{_libdir}/libOpenGL.so \
-  -DOPENGL_gles3_LIBRARY=%{_libdir}/libGLESv2.so \
-  -DOPENGL_GLES3_INCLUDE_DIR=/usr/include \
-  -DOPENGL_egl_LIBRARY=%{_libdir}/libEGL.so \
-  -DOPENGL_EGL_INCLUDE_DIR=/usr/include \
-  -DOPENGL_INCLUDE_DIR=/usr/include
+  $GL_FLAGS
 cmake --build build --parallel %{_smp_build_ncpus}
 cmake --install build
 popd
@@ -433,12 +422,7 @@ cmake -B build \
   -DBUILD_TESTING=OFF \
   -DCMAKE_INSTALL_RPATH="$VENDOR_RPATH" \
   -DCMAKE_BUILD_WITH_INSTALL_RPATH=ON \
-  -DOPENGL_opengl_LIBRARY=%{_libdir}/libOpenGL.so \
-  -DOPENGL_gles3_LIBRARY=%{_libdir}/libGLESv2.so \
-  -DOPENGL_GLES3_INCLUDE_DIR=/usr/include \
-  -DOPENGL_egl_LIBRARY=%{_libdir}/libEGL.so \
-  -DOPENGL_EGL_INCLUDE_DIR=/usr/include \
-  -DOPENGL_INCLUDE_DIR=/usr/include
+  $GL_FLAGS
 cmake --build build --parallel %{_smp_build_ncpus}
 
 # Note: start-hyprland is built via add_subdirectory(start) in main CMakeLists.txt
@@ -455,13 +439,7 @@ cmake -B build \
   -DCMAKE_CXX_FLAGS="$GCC15_CXXFLAGS" \
   -DCMAKE_INSTALL_RPATH="$SUBPKG_RPATH" \
   -DCMAKE_BUILD_WITH_INSTALL_RPATH=ON \
-  -DOpenGL_GL_PREFERENCE=GLVND \
-  -DOPENGL_opengl_LIBRARY=%{_libdir}/libOpenGL.so \
-  -DOPENGL_gles3_LIBRARY=%{_libdir}/libGLESv2.so \
-  -DOPENGL_GLES3_INCLUDE_DIR=/usr/include \
-  -DOPENGL_egl_LIBRARY=%{_libdir}/libEGL.so \
-  -DOPENGL_EGL_INCLUDE_DIR=/usr/include \
-  -DOPENGL_INCLUDE_DIR=/usr/include
+  $GL_FLAGS
 cmake --build build --parallel %{_smp_build_ncpus}
 popd
 
@@ -538,7 +516,7 @@ rm -rf %{buildroot}%{_datadir}/glaze
 %{_bindir}/hyprland
 %{_bindir}/hyprctl
 %{_bindir}/hyprpm
-# NEW: start-hyprland watchdog binary
+# start-hyprland watchdog binary
 %{_bindir}/start-hyprland
 # Vendored libraries
 %dir %{_libexecdir}/%{name}

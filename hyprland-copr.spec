@@ -41,7 +41,8 @@ Name:           hyprland
 Version:        %{hyprland_version}
 Release:        %{hyprland_release}%{?dist}
 Summary:        Dynamic tiling Wayland compositor
-License:        BSD-3-Clause
+# hyprlang: LGPL-3.0-only; udis86: BSD-2-Clause; Lua, glaze: MIT
+License:        BSD-3-Clause AND BSD-2-Clause AND LGPL-3.0-only AND MIT
 URL:            https://github.com/hyprwm/Hyprland
 
 # Main source
@@ -226,6 +227,14 @@ tar -xzf %{SOURCE30}
 tar -xzf %{SOURCE40}
 tar -xzf %{SOURCE41}
 
+# Licenses of the vendored code shipped in the package (Lua keeps its own in lua.h)
+mkdir licenses
+for lib in aquamarine glaze hyprcursor hyprgraphics hyprland-protocols hyprlang hyprtoolkit hyprutils hyprwire; do
+  cp $lib-[0-9]*/LICENSE licenses/LICENSE.$lib
+done
+cp subprojects/udis86/LICENSE licenses/LICENSE.udis86
+sed -n '/^\* Copyright/,/^\*\*\*/p' lua-%{lua_ver}/src/lua.h > licenses/LICENSE.lua
+
 %build
 # hwdata.pc for pkg-config consumers
 mkdir -p pkgconfig
@@ -384,7 +393,7 @@ done
 rm -rf %{buildroot}%{_includedir}/hyprland %{buildroot}%{_datadir}/pkgconfig/hyprland.pc
 
 %files
-%license LICENSE
+%license LICENSE licenses/*
 %doc README.md
 # Binaries
 %{_bindir}/Hyprland

@@ -117,49 +117,30 @@ EOF
 
 VENDOR_PREFIX="$(pwd)/vendor"
 export PATH="$VENDOR_PREFIX/bin:$PATH"
-export PKG_CONFIG_PATH="$VENDOR_PREFIX/lib64/pkgconfig:$VENDOR_PREFIX/lib/pkgconfig:$VENDOR_PREFIX/share/pkgconfig:$(pwd)/pkgconfig:%{_libdir}/pkgconfig:%{_datadir}/pkgconfig"
+export PKG_CONFIG_PATH="$VENDOR_PREFIX/lib64/pkgconfig:$VENDOR_PREFIX/share/pkgconfig:$(pwd)/pkgconfig:%{_libdir}/pkgconfig:%{_datadir}/pkgconfig"
 export CMAKE_PREFIX_PATH="$VENDOR_PREFIX"
 
-# optflags are repeated because -DCMAKE_CXX_FLAGS replaces the CXXFLAGS from the environment
-OPT_CXXFLAGS="%{optflags}"
+# 1) hyprwayland-scanner (build tool), hyprutils, hyprlang
+for dep in hyprwayland-scanner-%{hyprwayland_scanner_ver} hyprutils-%{hyprutils_ver} hyprlang-%{hyprlang_ver}; do
+  pushd $dep
+  cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$VENDOR_PREFIX" \
+    -DCMAKE_INSTALL_LIBDIR=lib64
+  cmake --build build --parallel %{_smp_build_ncpus}
+  cmake --install build
+  popd
+done
 
-# 1) hyprwayland-scanner (build tool)
-pushd hyprwayland-scanner-%{hyprwayland_scanner_ver}
-cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$VENDOR_PREFIX" \
-  -DCMAKE_INSTALL_LIBDIR=lib64
-cmake --build build --parallel %{_smp_build_ncpus}
-cmake --install build
-popd
-
-# 2) hyprutils
-pushd hyprutils-%{hyprutils_ver}
-cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$VENDOR_PREFIX" \
-  -DCMAKE_PREFIX_PATH="$VENDOR_PREFIX" -DCMAKE_INSTALL_LIBDIR=lib64
-cmake --build build --parallel %{_smp_build_ncpus}
-cmake --install build
-popd
-
-# 3) hyprlang
-pushd hyprlang-%{hyprlang_ver}
-cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$VENDOR_PREFIX" \
-  -DCMAKE_PREFIX_PATH="$VENDOR_PREFIX" -DCMAKE_INSTALL_LIBDIR=lib64
-cmake --build build --parallel %{_smp_build_ncpus}
-cmake --install build
-popd
-
-# 4) hyprland-protocols
+# 2) hyprland-protocols
 pushd hyprland-protocols-%{hyprland_protocols_ver}
 cmake -B build -DCMAKE_INSTALL_PREFIX="$VENDOR_PREFIX"
 cmake --install build
 popd
 
-# 5) aquamarine, hyprgraphics, hyprtoolkit (to build the share picker against)
+# 3) aquamarine, hyprgraphics, hyprtoolkit (to build the share picker against)
 for dep in aquamarine-%{aquamarine_ver} hyprgraphics-%{hyprgraphics_ver} hyprtoolkit-%{hyprtoolkit_ver}; do
   pushd $dep
   cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$VENDOR_PREFIX" \
-    -DCMAKE_PREFIX_PATH="$VENDOR_PREFIX" -DCMAKE_INSTALL_LIBDIR=lib64 \
-    -Dhyprwayland-scanner_DIR="$VENDOR_PREFIX/lib64/cmake/hyprwayland-scanner" \
-    -DCMAKE_CXX_FLAGS="$OPT_CXXFLAGS" \
+    -DCMAKE_INSTALL_LIBDIR=lib64 \
     -DOpenGL_GL_PREFERENCE=GLVND \
     -DOPENGL_opengl_LIBRARY=%{_libdir}/libOpenGL.so \
     -DOPENGL_gles3_LIBRARY=%{_libdir}/libGLESv2.so \
@@ -172,18 +153,15 @@ for dep in aquamarine-%{aquamarine_ver} hyprgraphics-%{hyprgraphics_ver} hyprtoo
   popd
 done
 
-# 6) xdg-desktop-portal-hyprland
+# 4) xdg-desktop-portal-hyprland
 # BUILD_TESTING off: skip the share picker data unit test
 # RUNPATH points to hyprland's vendor libs (installed by hyprland package)
 # rpath-link: resolves libhyprtoolkit's own deps (hyprlang) at link time only;
 # $LDFLAGS repeated because -DCMAKE_EXE_LINKER_FLAGS replaces the env default
-VENDOR_RPATH='%{_libexecdir}/hyprland/vendor/lib64:%{_libexecdir}/hyprland/vendor/lib'
+VENDOR_RPATH='%{_libexecdir}/hyprland/vendor/lib64'
 cmake -B build \
   -DCMAKE_BUILD_TYPE=Release \
   -DCMAKE_INSTALL_PREFIX=%{_prefix} \
-  -DCMAKE_PREFIX_PATH="$VENDOR_PREFIX" \
-  -Dhyprwayland-scanner_DIR="$VENDOR_PREFIX/lib64/cmake/hyprwayland-scanner" \
-  -DCMAKE_CXX_FLAGS="$OPT_CXXFLAGS" \
   -DCMAKE_EXE_LINKER_FLAGS="$LDFLAGS -Wl,-rpath-link,$VENDOR_PREFIX/lib64" \
   -DBUILD_TESTING=OFF \
   -DCMAKE_INSTALL_RPATH="$VENDOR_RPATH" \
@@ -193,11 +171,9 @@ cmake --build build --parallel %{_smp_build_ncpus}
 %install
 DESTDIR=%{buildroot} cmake --install build
 
-# Log RPATH of installed binaries
-echo "Verifying RPATH on installed binaries:"
+# Without RUNPATH the binaries can't find the vendored libs
 for bin in %{buildroot}%{_libexecdir}/xdg-desktop-portal-hyprland %{buildroot}%{_bindir}/hyprland-share-picker; do
-  [ -x "$bin" ] || continue
-  echo "  $(basename $bin): $(readelf -d "$bin" 2>/dev/null | grep -E 'RPATH|RUNPATH' || echo 'no RPATH set')"
+  readelf -d "$bin" | grep -q 'RUNPATH.*/vendor/lib64' || { echo "$bin: no vendor RUNPATH"; exit 1; }
 done
 
 %files
@@ -216,10 +192,8 @@ done
 
 %changelog
 * Sun Nov 01 2026 Asher Buk <AshBuk@users.noreply.github.com> - 1.5.0-1
-- Update to xdg-desktop-portal-hyprland 1.5.0 (workspace sharing)
-- Share picker now uses hyprtoolkit instead of Qt6
+- Update to xdg-desktop-portal-hyprland 1.5.0
 - Bump hyprutils 0.14.2 -> 0.14.3, hyprland-protocols 0.7.0 -> 0.8.0
-- Require hyprland >= 0.57.0 and matching hyprland-vendor() libs
 
 * Thu Sep 17 2026 Asher Buk <AshBuk@users.noreply.github.com> - 1.4.1-2
 - Bump hyprutils 0.14.0 -> 0.14.2

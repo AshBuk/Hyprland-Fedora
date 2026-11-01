@@ -91,7 +91,7 @@ download "hyprland-${HYPRLAND_VERSION}.tar.gz" \
 download "udis86-hyprland.tar.gz" \
     "https://github.com/AshBuk/Hyprland-Fedora/releases/download/${BUILD_ASSETS_RELEASE}/udis86-hyprland.tar.gz"
 download "glaze-${GLAZE_VER}.tar.gz" \
-    "https://github.com/stephenberry/glaze/archive/refs/tags/v${GLAZE_VER}.tar.gz"
+    "https://github.com/AshBuk/Hyprland-Fedora/releases/download/${BUILD_ASSETS_RELEASE}/glaze-${GLAZE_VER}.tar.gz"
 download "hyprlock-${HYPRLOCK_VERSION}.tar.gz" \
     "https://github.com/hyprwm/hyprlock/archive/refs/tags/v${HYPRLOCK_VERSION}.tar.gz"
 download "hypridle-${HYPRIDLE_VERSION}.tar.gz" \

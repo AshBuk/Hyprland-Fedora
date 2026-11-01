@@ -87,7 +87,6 @@ BuildRequires:  glslang-devel
 BuildRequires:  hwdata
 BuildRequires:  libdisplay-info-devel
 BuildRequires:  libdrm-devel
-BuildRequires:  libepoxy-devel
 BuildRequires:  mesa-libgbm-devel
 BuildRequires:  mesa-libEGL-devel
 BuildRequires:  libglvnd-devel
@@ -97,13 +96,11 @@ BuildRequires:  libinput-devel >= 1.29
 BuildRequires:  libeis-devel
 # readline for hyprctl Lua REPL
 BuildRequires:  readline-devel
+BuildRequires:  lcms2-devel
 BuildRequires:  libjxl-devel
-BuildRequires:  libliftoff-devel
-BuildRequires:  libspng-devel
 BuildRequires:  libwebp-devel
 BuildRequires:  libxcb-devel
 BuildRequires:  libXcursor-devel
-BuildRequires:  libxcvt-devel
 BuildRequires:  libxkbcommon-devel
 BuildRequires:  pango-devel
 BuildRequires:  pixman-devel
@@ -120,10 +117,7 @@ BuildRequires:  librsvg2-devel
 BuildRequires:  libjpeg-turbo-devel
 BuildRequires:  libpng-devel
 BuildRequires:  file-devel
-BuildRequires:  xcb-util-devel
 BuildRequires:  xcb-util-errors-devel
-BuildRequires:  xcb-util-image-devel
-BuildRequires:  xcb-util-renderutil-devel
 BuildRequires:  xcb-util-wm-devel
 BuildRequires:  xorg-x11-server-Xwayland
 BuildRequires:  libXfont2-devel
@@ -139,57 +133,16 @@ BuildRequires:  libcanberra-devel
 # iniparser, abseil for hyprtoolkit
 BuildRequires:  iniparser-devel
 BuildRequires:  abseil-cpp-devel
-# Subpackage deps (hyprlock: PAM auth); D-Bus IPC for hyprlock, hypridle and Hyprland rtkit (0.57.0)
+# Subpackage deps (hyprlock: PAM auth); D-Bus IPC for hyprlock, hypridle and Hyprland rtkit
 BuildRequires:  pam-devel
 BuildRequires:  sdbus-cpp-devel >= 2.0.0
 
-# Runtime deps (system)
-Requires:       cairo
+# Runtime deps invisible to automatic soname Requires (linked libraries are added by RPM)
+# hwdata: PNP/PCI ID databases read by aquamarine; Xwayland: spawned for X11 clients
 Requires:       hwdata
-Requires:       libdisplay-info
-Requires:       libdrm
-Requires:       libepoxy
-Requires:       mesa-libgbm
-Requires:       libinput >= 1.29
-# libeis for input-capture protocol
-Requires:       libeis
-# readline for hyprctl Lua REPL
-Requires:       readline
-Requires:       libjxl
-Requires:       libliftoff
-Requires:       libspng
-Requires:       libwebp
-Requires:       libxcb
-Requires:       libXcursor
-Requires:       libxcvt
-Requires:       libxkbcommon
-Requires:       pango
-Requires:       pixman
-Requires:       pugixml
-Requires:       re2
-Requires:       libseat
-Requires:       libwayland-client
-Requires:       libwayland-server
-Requires:       libzip
-Requires:       librsvg2
-Requires:       xcb-util
-Requires:       xcb-util-errors
-Requires:       xcb-util-image
-Requires:       xcb-util-renderutil
-Requires:       xcb-util-wm
 Requires:       xorg-x11-server-Xwayland
-# libffi for hyprwire runtime
-Requires:       libffi
-# muparser for math expressions in config
-Requires:       muParser
-# libcanberra for bell sounds
-Requires:       libcanberra
-# sdbus-cpp for rtkit realtime scheduling
-Requires:       sdbus-cpp
+# rtkit grants Hyprland realtime scheduling over D-Bus
 Recommends:     rtkit
-# iniparser, abseil for hyprtoolkit
-Requires:       iniparser
-Requires:       abseil-cpp
 # Subpackages (installed by default via weak deps, removable individually)
 Recommends:     hyprlock
 Recommends:     hypridle
@@ -562,6 +515,7 @@ rm -rf %{buildroot}%{_datadir}/glaze
 - Vendor hyprtoolkit 0.6.0 for xdg-desktop-portal-hyprland 1.5.0
 - Add libcanberra, sdbus-cpp (rtkit) deps; ship hyprland-session.target
 - Drop hyprctl shell completions (removed upstream)
+- Rely on automatic library Requires, drop unused build deps
 - Patch std::string::subview for GCC 15 (Fedora 43)
 
 * Thu Sep 17 2026 Asher Buk <AshBuk@users.noreply.github.com> - 0.56.2-2

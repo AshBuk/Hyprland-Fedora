@@ -80,7 +80,6 @@ Patch0:         https://github.com/AshBuk/Hyprland-Fedora/releases/download/%{bu
 # Build dependencies
 BuildRequires:  cmake
 BuildRequires:  gcc-c++
-BuildRequires:  git
 BuildRequires:  pkgconf-pkg-config
 BuildRequires:  python3
 
@@ -163,7 +162,7 @@ Recommends:     hypridle
 Hyprland is a dynamic tiling Wayland compositor with modern Wayland features,
 high customizability, IPC, plugins, and visual effects.
 
-This is a single-package COPR build for Fedora.
+This is a COPR build for Fedora, with hyprlock and hypridle as subpackages.
 Pinned Hyprland dependencies are built from fixed-version sources and installed
 into a private vendor prefix to avoid polluting system /usr/lib64.
 
@@ -424,21 +423,8 @@ install -d %{buildroot}%{_userunitdir}
 mv %{buildroot}%{_libdir}/systemd/user/hyprland-session.target %{buildroot}%{_userunitdir}/
 rmdir %{buildroot}%{_libdir}/systemd/user %{buildroot}%{_libdir}/systemd
 
-# Ensure "hyprland" alias exists (some setups expect it)
+# Relative alias (upstream installs an absolute symlink)
 ln -sf Hyprland %{buildroot}%{_bindir}/hyprland
-
-# Ensure session desktop entry exists
-install -d %{buildroot}%{_datadir}/wayland-sessions
-if [ ! -f %{buildroot}%{_datadir}/wayland-sessions/hyprland.desktop ]; then
-cat > %{buildroot}%{_datadir}/wayland-sessions/hyprland.desktop << 'EOF'
-[Desktop Entry]
-Name=Hyprland
-Comment=Dynamic tiling Wayland compositor
-Exec=Hyprland
-Type=Application
-DesktopNames=Hyprland
-EOF
-fi
 
 # Install vendored runtime libs into private prefix
 VENDOR_DST=%{buildroot}%{_libexecdir}/%{name}/vendor

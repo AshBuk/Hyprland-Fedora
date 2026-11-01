@@ -58,7 +58,7 @@ sudo dnf copr disable ashbuk/Hyprland-Fedora
 
 **Vendored libraries** (in `/usr/libexec/hyprland/vendor/`):
 
-libaquamarine, libhyprlang, libhyprutils, libhyprcursor, libhyprgraphics, libhyprwire, libhyprtoolkit, hyprwayland-scanner, hyprland-protocols, udis86, glaze
+libaquamarine, libhyprlang, libhyprutils, libhyprcursor, libhyprgraphics, libhyprwire, libhyprtoolkit
 
 ## Build Details
 

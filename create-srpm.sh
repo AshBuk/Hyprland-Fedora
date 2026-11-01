@@ -62,6 +62,8 @@ validate_version "$SATELLITE_SPEC" "hyprutils_ver"           "$HYPRUTILS_VER"
 validate_version "$SATELLITE_SPEC" "hyprlang_ver"            "$HYPRLANG_VER"
 validate_version "$SATELLITE_SPEC" "hyprcursor_ver"          "$HYPRCURSOR_VER"
 validate_version "$SATELLITE_SPEC" "hyprgraphics_ver"        "$HYPRGRAPHICS_VER"
+validate_version "$SATELLITE_SPEC" "aquamarine_ver"          "$AQUAMARINE_VER"
+validate_version "$SATELLITE_SPEC" "hyprtoolkit_ver"         "$HYPRTOOLKIT_VER"
 validate_version "$SATELLITE_SPEC" "hyprland_protocols_ver"  "$HYPRLAND_PROTOCOLS_VER"
 echo "  All versions consistent with hyprland-copr.spec"
 

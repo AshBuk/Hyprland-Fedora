@@ -5,18 +5,19 @@
 # =============================================================================
 # Version definitions (single source of truth)
 # =============================================================================
-%global hyprland_version        0.56.2
-%global hyprland_protocols_ver  0.7.0
+%global hyprland_version        0.57.0
+%global hyprland_protocols_ver  0.8.0
 %global hyprwayland_scanner_ver 0.4.6
-%global hyprutils_ver           0.14.2
+%global hyprutils_ver           0.14.3
 %global hyprlang_ver            0.6.8
 %global hyprcursor_ver          0.1.13
 %global hyprgraphics_ver        0.5.1
 %global aquamarine_ver          0.15.1
 %global hyprwire_ver            0.3.1
 %global glaze_ver               7.2.0
+%global hyprtoolkit_ver         0.6.0
 # Lua 5.5 (Hyprland 0.55.0+ requires >= 5.5; Fedora 43/44 ship 5.4.8)
-%global lua_ver                 5.5.0
+%global lua_ver                 5.5.1
 # Subpackage versions
 %global hyprlock_version        0.9.6
 %global hyprlock_release        1
@@ -28,11 +29,11 @@
 
 # Exclude auto-requires for vendored Hyprland libraries
 # These are built from source and installed in /usr/libexec/hyprland/vendor/
-%global __requires_exclude pkgconfig\\((aquamarine|hyprutils|hyprlang|hyprcursor|hyprgraphics|hyprwayland-scanner|hyprland-protocols|hyprwire)\\)
+%global __requires_exclude pkgconfig\\((aquamarine|hyprutils|hyprlang|hyprcursor|hyprgraphics|hyprwayland-scanner|hyprland-protocols|hyprwire|hyprtoolkit)\\)
 
 Name:           hyprland
 Version:        %{hyprland_version}
-Release:        2%{?dist}
+Release:        1%{?dist}
 Summary:        Dynamic tiling Wayland compositor
 License:        BSD-3-Clause
 URL:            https://github.com/hyprwm/Hyprland
@@ -41,11 +42,11 @@ URL:            https://github.com/hyprwm/Hyprland
 Source0:        https://github.com/hyprwm/Hyprland/archive/refs/tags/v%{hyprland_version}.tar.gz#/%{name}-%{hyprland_version}.tar.gz
 
 # Git submodules (not included in GitHub tarball)
-Source10:       https://github.com/hyprwm/hyprland-protocols/archive/refs/tags/v%{hyprland_protocols_ver}.tar.gz#/hyprland-protocols-%{hyprland_protocols_ver}.tar.gz
 # udis86 from Hyprland subprojects (patched for Python 3.x, with CMakeLists.txt)
 Source11:       https://github.com/AshBuk/Hyprland-Fedora/releases/download/%{build_assets_release}/udis86-hyprland.tar.gz
 
 # Hyprland pinned deps (vendored, fixed versions)
+Source10:       https://github.com/hyprwm/hyprland-protocols/archive/refs/tags/v%{hyprland_protocols_ver}.tar.gz#/hyprland-protocols-%{hyprland_protocols_ver}.tar.gz
 Source20:       https://github.com/hyprwm/hyprwayland-scanner/archive/refs/tags/v%{hyprwayland_scanner_ver}.tar.gz#/hyprwayland-scanner-%{hyprwayland_scanner_ver}.tar.gz
 Source21:       https://github.com/hyprwm/hyprutils/archive/refs/tags/v%{hyprutils_ver}.tar.gz#/hyprutils-%{hyprutils_ver}.tar.gz
 Source22:       https://github.com/hyprwm/hyprlang/archive/refs/tags/v%{hyprlang_ver}.tar.gz#/hyprlang-%{hyprlang_ver}.tar.gz
@@ -54,6 +55,8 @@ Source24:       https://github.com/hyprwm/hyprgraphics/archive/refs/tags/v%{hypr
 Source25:       https://github.com/hyprwm/aquamarine/archive/refs/tags/v%{aquamarine_ver}.tar.gz#/aquamarine-%{aquamarine_ver}.tar.gz
 Source26:       https://github.com/hyprwm/hyprwire/archive/refs/tags/v%{hyprwire_ver}.tar.gz#/hyprwire-%{hyprwire_ver}.tar.gz
 Source27:       https://www.lua.org/ftp/lua-%{lua_ver}.tar.gz
+# hyprtoolkit: not used by Hyprland itself, shipped for xdg-desktop-portal-hyprland's picker
+Source28:       https://github.com/hyprwm/hyprtoolkit/archive/refs/tags/v%{hyprtoolkit_ver}.tar.gz#/hyprtoolkit-%{hyprtoolkit_ver}.tar.gz
 
 # glaze JSON library (for hyprpm, mock chroot has no network for FetchContent)
 # Using our release mirror to ensure availability
@@ -64,18 +67,16 @@ Source40:       https://github.com/hyprwm/hyprlock/archive/refs/tags/v%{hyprlock
 Source41:       https://github.com/hyprwm/hypridle/archive/refs/tags/v%{hypridle_version}.tar.gz#/hypridle-%{hypridle_version}.tar.gz
 
 # Downstream compatibility patches (hosted in our release mirror)
-# Fedora 43 (GCC 15) lacks std::ranges::starts_with (libstdc++ ships it from GCC 16).
-# Drop once Fedora 43 reaches EOL.
+# Fedora 43 (GCC 15) lacks std::ranges::starts_with and std::string::subview
+# (libstdc++ ships them from GCC 16). Drop once Fedora 43 reaches EOL.
 # Version the patch was cut against, not the one being built: still applies as-is.
-%global gcc15_patch_ver 0.56.0
-Patch0:         https://github.com/AshBuk/Hyprland-Fedora/releases/download/%{build_assets_release}/hyprland-%{gcc15_patch_ver}-ranges-starts-with-gcc15.patch
+%global gcc15_patch_ver 0.57.0
+Patch0:         https://github.com/AshBuk/Hyprland-Fedora/releases/download/%{build_assets_release}/hyprland-%{gcc15_patch_ver}-gcc15.patch
 
 # Build dependencies
 BuildRequires:  cmake
 BuildRequires:  gcc-c++
 BuildRequires:  git
-BuildRequires:  meson
-BuildRequires:  ninja-build
 BuildRequires:  pkgconf-pkg-config
 BuildRequires:  python3
 
@@ -133,7 +134,12 @@ BuildRequires:  libuuid-devel
 BuildRequires:  libffi-devel
 # NEW: muparser for math expressions in config (0.53.0)
 BuildRequires:  muParser-devel
-# Subpackage deps (hyprlock: PAM auth, hyprlock+hypridle: D-Bus IPC)
+# NEW: libcanberra for bell sounds (0.57.0)
+BuildRequires:  libcanberra-devel
+# NEW: iniparser, abseil for hyprtoolkit
+BuildRequires:  iniparser-devel
+BuildRequires:  abseil-cpp-devel
+# Subpackage deps (hyprlock: PAM auth); D-Bus IPC for hyprlock, hypridle and Hyprland rtkit (0.57.0)
 BuildRequires:  pam-devel
 BuildRequires:  sdbus-cpp-devel >= 2.0.0
 
@@ -176,6 +182,14 @@ Requires:       xorg-x11-server-Xwayland
 Requires:       libffi
 # NEW: muparser for math expressions in config (0.53.0)
 Requires:       muParser
+# NEW: libcanberra for bell sounds (0.57.0)
+Requires:       libcanberra
+# NEW: sdbus-cpp for rtkit realtime scheduling (0.57.0)
+Requires:       sdbus-cpp
+Recommends:     rtkit
+# NEW: iniparser, abseil for hyprtoolkit
+Requires:       iniparser
+Requires:       abseil-cpp
 # Subpackages (installed by default via weak deps, removable individually)
 Recommends:     hyprlock
 Recommends:     hypridle
@@ -221,20 +235,19 @@ the display, or suspending the system.
 
 %prep
 # -N: don't auto-apply patches; Patch0 is gated to Fedora 43 and older (GCC < 16),
-# which lack std::ranges::starts_with. Fedora 44+ builds the upstream code unchanged.
+# which lack std::ranges::starts_with and std::string::subview. Fedora 44+ builds the upstream code unchanged.
 %autosetup -N -n Hyprland-%{hyprland_version}
 %if 0%{?fedora} <= 43
 %patch -P 0 -p1
 %endif
 
 # Unpack submodules into correct locations
-rm -rf subprojects/hyprland-protocols subprojects/udis86
-tar -xzf %{SOURCE10} -C subprojects
-mv subprojects/hyprland-protocols-%{hyprland_protocols_ver} subprojects/hyprland-protocols
 # udis86 from Hyprland subprojects (patched for Python 3.x, includes CMakeLists.txt)
+rm -rf subprojects/udis86
 tar -xzf %{SOURCE11} -C subprojects
 
 # Unpack vendored deps in top build dir
+tar -xzf %{SOURCE10}
 tar -xzf %{SOURCE20}
 tar -xzf %{SOURCE21}
 tar -xzf %{SOURCE22}
@@ -243,6 +256,7 @@ tar -xzf %{SOURCE24}
 tar -xzf %{SOURCE25}
 tar -xzf %{SOURCE26}
 tar -xzf %{SOURCE27}
+tar -xzf %{SOURCE28}
 
 # Unpack glaze (for hyprpm, mock chroot has no network for FetchContent)
 tar -xzf %{SOURCE30}
@@ -266,7 +280,7 @@ EOF
 
 VENDOR_PREFIX="$(pwd)/vendor"
 export PATH="$VENDOR_PREFIX/bin:$PATH"
-export PKG_CONFIG_PATH="$VENDOR_PREFIX/lib64/pkgconfig:$VENDOR_PREFIX/lib/pkgconfig:$(pwd)/pkgconfig:%{_libdir}/pkgconfig:%{_datadir}/pkgconfig"
+export PKG_CONFIG_PATH="$VENDOR_PREFIX/lib64/pkgconfig:$VENDOR_PREFIX/lib/pkgconfig:$VENDOR_PREFIX/share/pkgconfig:$(pwd)/pkgconfig:%{_libdir}/pkgconfig:%{_datadir}/pkgconfig"
 export CMAKE_PREFIX_PATH="$VENDOR_PREFIX"
 
 # GCC 15 in Fedora 43 errors on zero-length arrays (generated by hyprwayland-scanner)
@@ -353,11 +367,10 @@ cmake --build build --parallel %{_smp_build_ncpus}
 cmake --install build
 popd
 
-# 8) hyprland-protocols
-pushd subprojects/hyprland-protocols
-meson setup build --prefix="$VENDOR_PREFIX"
-ninja -C build
-ninja -C build install
+# 8) hyprland-protocols (required via pkg-config since 0.57.0, submodule dropped upstream)
+pushd hyprland-protocols-%{hyprland_protocols_ver}
+cmake -B build -DCMAKE_INSTALL_PREFIX="$VENDOR_PREFIX"
+cmake --install build
 popd
 
 # 9) glaze (header-only JSON library, install to vendor prefix for find_package)
@@ -381,7 +394,24 @@ Cflags: -I$VENDOR_PREFIX/include
 EOF
 popd
 
-# 11) Hyprland (needs -fpermissive for generated protocol code with zero-size arrays)
+# 11) hyprtoolkit (needs -fpermissive for generated protocol code with zero-size arrays)
+pushd hyprtoolkit-%{hyprtoolkit_ver}
+cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$VENDOR_PREFIX" \
+  -DCMAKE_PREFIX_PATH="$VENDOR_PREFIX" -DCMAKE_INSTALL_LIBDIR=lib64 \
+  -Dhyprwayland-scanner_DIR="$VENDOR_PREFIX/lib64/cmake/hyprwayland-scanner" \
+  -DCMAKE_CXX_FLAGS="$GCC15_CXXFLAGS" \
+  -DOpenGL_GL_PREFERENCE=GLVND \
+  -DOPENGL_opengl_LIBRARY=%{_libdir}/libOpenGL.so \
+  -DOPENGL_gles3_LIBRARY=%{_libdir}/libGLESv2.so \
+  -DOPENGL_GLES3_INCLUDE_DIR=/usr/include \
+  -DOPENGL_egl_LIBRARY=%{_libdir}/libEGL.so \
+  -DOPENGL_EGL_INCLUDE_DIR=/usr/include \
+  -DOPENGL_INCLUDE_DIR=/usr/include
+cmake --build build --parallel %{_smp_build_ncpus}
+cmake --install build
+popd
+
+# 12) Hyprland (needs -fpermissive for generated protocol code with zero-size arrays)
 # Disable BUILD_TESTING to skip hyprtester (its plugin Makefile doesn't support vendored deps)
 # Set RPATH at build time to avoid patchelf corruption issues
 # Add vendor include path for glaze headers (start-hyprland uses direct #include, not find_package)
@@ -414,7 +444,7 @@ cmake --build build --parallel %{_smp_build_ncpus}
 # Note: start-hyprland is built via add_subdirectory(start) in main CMakeLists.txt
 # No separate build step needed - it inherits glaze and other settings from parent
 
-# 12) hyprlock (screen lock utility, needs OpenGL/EGL)
+# 13) hyprlock (screen lock utility, needs OpenGL/EGL)
 SUBPKG_RPATH='%{_libexecdir}/hyprland/vendor/lib64:%{_libexecdir}/hyprland/vendor/lib'
 pushd hyprlock-%{hyprlock_version}
 cmake -B build \
@@ -435,7 +465,7 @@ cmake -B build \
 cmake --build build --parallel %{_smp_build_ncpus}
 popd
 
-# 13) hypridle (idle daemon, no OpenGL needed)
+# 14) hypridle (idle daemon, no OpenGL needed)
 pushd hypridle-%{hypridle_version}
 cmake -B build \
   -DCMAKE_BUILD_TYPE=Release \
@@ -456,6 +486,11 @@ VENDOR_PREFIX="$(pwd)/vendor"
 
 # Install Hyprland binaries/data (includes start-hyprland via add_subdirectory)
 DESTDIR=%{buildroot} cmake --install build
+
+# Upstream installs the session target to ${CMAKE_INSTALL_LIBDIR} (lib64), where systemd doesn't look
+install -d %{buildroot}%{_userunitdir}
+mv %{buildroot}%{_libdir}/systemd/user/hyprland-session.target %{buildroot}%{_userunitdir}/
+rmdir %{buildroot}%{_libdir}/systemd/user %{buildroot}%{_libdir}/systemd
 
 # Ensure "hyprland" alias exists (some setups expect it)
 ln -sf Hyprland %{buildroot}%{_bindir}/hyprland
@@ -511,6 +546,8 @@ rm -rf %{buildroot}%{_datadir}/glaze
 # Desktop entries
 %{_datadir}/wayland-sessions/hyprland.desktop
 %{_datadir}/wayland-sessions/hyprland-uwsm.desktop
+# Systemd user session target (0.57.0)
+%{_userunitdir}/hyprland-session.target
 # Data files (exclude subpackage configs to avoid ownership conflicts)
 %{_datadir}/hypr/
 %exclude %{_datadir}/hypr/hyprlock.conf
@@ -523,12 +560,9 @@ rm -rf %{buildroot}%{_datadir}/glaze
 # Man pages
 %{_mandir}/man1/Hyprland.1*
 %{_mandir}/man1/hyprctl.1*
-# Shell completions
-%{_datadir}/bash-completion/completions/hyprctl
+# Shell completions (hyprctl ones dropped upstream in 0.57.0)
 %{_datadir}/bash-completion/completions/hyprpm
-%{_datadir}/fish/vendor_completions.d/hyprctl.fish
 %{_datadir}/fish/vendor_completions.d/hyprpm.fish
-%{_datadir}/zsh/site-functions/_hyprctl
 %{_datadir}/zsh/site-functions/_hyprpm
 
 %files -n hyprlock
@@ -544,6 +578,14 @@ rm -rf %{buildroot}%{_datadir}/glaze
 %{_datadir}/hypr/hypridle.conf
 
 %changelog
+* Sun Nov 01 2026 Asher Buk <AshBuk@users.noreply.github.com> - 0.57.0-1
+- Update to Hyprland 0.57.0
+- Bump hyprutils 0.14.2 -> 0.14.3, hyprland-protocols 0.7.0 -> 0.8.0, Lua 5.5.0 -> 5.5.1
+- Vendor hyprtoolkit 0.6.0 for xdg-desktop-portal-hyprland 1.5.0
+- Add libcanberra, sdbus-cpp (rtkit) deps; ship hyprland-session.target
+- Drop hyprctl shell completions (removed upstream)
+- Patch std::string::subview for GCC 15 (Fedora 43)
+
 * Thu Sep 17 2026 Asher Buk <AshBuk@users.noreply.github.com> - 0.56.2-2
 - Bump aquamarine 0.14.0 -> 0.15.1 (ABI break, SOVERSION 13 -> 14)
 - Bump hyprutils 0.14.0 -> 0.14.2

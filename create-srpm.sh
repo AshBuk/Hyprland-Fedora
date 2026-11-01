@@ -31,6 +31,7 @@ HYPRGRAPHICS_VER=$(parse_spec_global "$HYPRLAND_SPEC" "hyprgraphics_ver")
 AQUAMARINE_VER=$(parse_spec_global "$HYPRLAND_SPEC" "aquamarine_ver")
 HYPRWIRE_VER=$(parse_spec_global "$HYPRLAND_SPEC" "hyprwire_ver")
 GLAZE_VER=$(parse_spec_global "$HYPRLAND_SPEC" "glaze_ver")
+HYPRTOOLKIT_VER=$(parse_spec_global "$HYPRLAND_SPEC" "hyprtoolkit_ver")
 BUILD_ASSETS_RELEASE=$(parse_spec_global "$HYPRLAND_SPEC" "build_assets_release")
 
 # Subpackage versions (in hyprland-copr.spec)
@@ -117,6 +118,8 @@ download "aquamarine-${AQUAMARINE_VER}.tar.gz" \
     "https://github.com/hyprwm/aquamarine/archive/refs/tags/v${AQUAMARINE_VER}.tar.gz"
 download "hyprwire-${HYPRWIRE_VER}.tar.gz" \
     "https://github.com/hyprwm/hyprwire/archive/refs/tags/v${HYPRWIRE_VER}.tar.gz"
+download "hyprtoolkit-${HYPRTOOLKIT_VER}.tar.gz" \
+    "https://github.com/hyprwm/hyprtoolkit/archive/refs/tags/v${HYPRTOOLKIT_VER}.tar.gz"
 
 cd ..
 

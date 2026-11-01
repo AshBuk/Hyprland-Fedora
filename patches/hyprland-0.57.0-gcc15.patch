@@ -1,0 +1,42 @@
+Subject: Build fixes for GCC 15 (Fedora 43): avoid GCC 16-only libstdc++ APIs
+
+Fedora 43 stays on GCC 15 for its whole life, while upstream targets GCC 16.
+Two library additions used by Hyprland are missing from GCC 15's libstdc++,
+so the compositor fails to build there. Fedora 44 (GCC 16) is unaffected.
+
+1. std::ranges::starts_with (C++23, libstdc++ from GCC 16):
+   "'starts_with' is not a member of 'std::ranges'". str_view is a lazy
+   std::views::transform view, not a std::string, so the string_view member
+   .starts_with() is not available. Use std::ranges::mismatch (C++20): the
+   second range is fully consumed iff str_view starts with it.
+
+2. std::basic_string::subview (C++26, libstdc++ from GCC 16):
+   "'std::string' has no member named 'subview'". Construct a
+   std::string_view over the request and take substr(), which yields the same
+   non-owning view.
+
+Upstream considers the original valid C++23/26, so this is a downstream
+compatibility shim. Drop this patch once Fedora 43 reaches EOL.
+
+--- a/src/helpers/MiscFunctions.cpp	2026-11-01 04:00:22.277308760 +0200
++++ b/src/helpers/MiscFunctions.cpp	2026-11-01 04:00:22.288198675 +0200
+@@ -474,7 +474,7 @@
+     });
+ 
+     return [&](auto&&... prefixes) -> bool {
+-        return (... || std::ranges::starts_with(str_view, prefixes));
++        return (... || (std::ranges::mismatch(str_view, prefixes).in2 == std::ranges::end(prefixes)));
+     }("true"sv, "yes"sv, "on"sv);
+     // clang-format on
+ }
+--- a/src/ipc/s1/S1.cpp	2026-11-01 04:00:22.283123322 +0200
++++ b/src/ipc/s1/S1.cpp	2026-11-01 04:00:22.289399160 +0200
+@@ -145,7 +145,7 @@
+             if (i < request.size() && (request[i + 1] == '\\' || request[i + 1] == ';'))
+                 ++i;
+             else
+-                LOG(Log::ERR, "Malformed socket1 request: invalid escape sequence {} at position {}, using it verbatim", request.subview(i, 2), i);
++                LOG(Log::ERR, "Malformed socket1 request: invalid escape sequence {} at position {}, using it verbatim", std::string_view{request}.substr(i, 2), i);
+         }
+         parsedCommand << request[i];
+     }

@@ -6,6 +6,7 @@
 # Version definitions (single source of truth)
 # =============================================================================
 %global hyprland_version        0.57.0
+%global hyprland_release        1
 %global hyprland_protocols_ver  0.8.0
 %global hyprwayland_scanner_ver 0.4.6
 %global hyprutils_ver           0.14.3
@@ -18,22 +19,25 @@
 %global hyprtoolkit_ver         0.6.0
 # Lua 5.5 (Hyprland 0.55.0+ requires >= 5.5; Fedora 43/44 ship 5.4.8)
 %global lua_ver                 5.5.1
-# Subpackage versions
+# Subpackage versions. Their Release also embeds the hyprland build they were linked
+# against, so every hyprland rebuild (new vendored libs) ships rebuilt hyprlock/hypridle.
 %global hyprlock_version        0.9.6
-%global hyprlock_release        1
+%global hyprlock_release        2
 %global hypridle_version        0.1.8
-%global hypridle_release        1
+%global hypridle_release        2
 
 # Build assets release (udis86, glaze tarballs - only changes when these deps update)
 %global build_assets_release    v0.54-fedora
 
-# Exclude auto-requires for vendored Hyprland libraries
-# These are built from source and installed in /usr/libexec/hyprland/vendor/
-%global __requires_exclude pkgconfig\\((aquamarine|hyprutils|hyprlang|hyprcursor|hyprgraphics|hyprwayland-scanner|hyprland-protocols|hyprwire|hyprtoolkit)\\)
+# Vendored Hyprland libraries are private (/usr/libexec/hyprland/vendor/, reached via RUNPATH):
+# don't advertise their sonames to the system, and don't require them from it.
+# ABI pairing is expressed with hyprland-vendor(<lib>) = <version> provides instead.
+%global __provides_exclude_from ^%{_libexecdir}/%{name}/vendor/.*$
+%global __requires_exclude ^(pkgconfig\\((aquamarine|hyprutils|hyprlang|hyprcursor|hyprgraphics|hyprwayland-scanner|hyprland-protocols|hyprwire|hyprtoolkit)\\)|lib(aquamarine|hypr[a-z]+)\\.so)
 
 Name:           hyprland
 Version:        %{hyprland_version}
-Release:        1%{?dist}
+Release:        %{hyprland_release}%{?dist}
 Summary:        Dynamic tiling Wayland compositor
 License:        BSD-3-Clause
 URL:            https://github.com/hyprwm/Hyprland
@@ -143,6 +147,14 @@ Requires:       hwdata
 Requires:       xorg-x11-server-Xwayland
 # rtkit grants Hyprland realtime scheduling over D-Bus
 Recommends:     rtkit
+# Vendored library versions, for packages linked against them via RUNPATH
+Provides:       hyprland-vendor(aquamarine) = %{aquamarine_ver}
+Provides:       hyprland-vendor(hyprcursor) = %{hyprcursor_ver}
+Provides:       hyprland-vendor(hyprgraphics) = %{hyprgraphics_ver}
+Provides:       hyprland-vendor(hyprlang) = %{hyprlang_ver}
+Provides:       hyprland-vendor(hyprtoolkit) = %{hyprtoolkit_ver}
+Provides:       hyprland-vendor(hyprutils) = %{hyprutils_ver}
+Provides:       hyprland-vendor(hyprwire) = %{hyprwire_ver}
 # Subpackages (installed by default via weak deps, removable individually)
 Recommends:     hyprlock
 Recommends:     hypridle
@@ -160,10 +172,10 @@ into a private vendor prefix to avoid polluting system /usr/lib64.
 # -----------------------------------------------------------------------------
 %package -n hyprlock
 Version:        %{hyprlock_version}
-Release:        %{hyprlock_release}%{?dist}
+Release:        %{hyprlock_release}.%{hyprland_version}.%{hyprland_release}%{?dist}
 Summary:        Hyprland screen lock utility
 License:        BSD-3-Clause
-Requires:       hyprland >= %{hyprland_version}
+Requires:       hyprland%{?_isa} = %{hyprland_version}-%{hyprland_release}%{?dist}
 Requires:       pam
 
 %description -n hyprlock
@@ -176,10 +188,10 @@ and provides a customizable lock screen with widgets and effects.
 # -----------------------------------------------------------------------------
 %package -n hypridle
 Version:        %{hypridle_version}
-Release:        %{hypridle_release}%{?dist}
+Release:        %{hypridle_release}.%{hyprland_version}.%{hyprland_release}%{?dist}
 Summary:        Hyprland idle daemon
 License:        BSD-3-Clause
-Requires:       hyprland >= %{hyprland_version}
+Requires:       hyprland%{?_isa} = %{hyprland_version}-%{hyprland_release}%{?dist}
 
 %description -n hypridle
 hypridle is Hyprland's idle daemon. It monitors user activity and triggers
@@ -516,6 +528,8 @@ rm -rf %{buildroot}%{_datadir}/glaze
 - Add libcanberra, sdbus-cpp (rtkit) deps; ship hyprland-session.target
 - Drop hyprctl shell completions (removed upstream)
 - Rely on automatic library Requires, drop unused build deps
+- Stop exporting vendored sonames, provide hyprland-vendor() instead
+- Tie hyprlock/hypridle Release to the hyprland build they link against
 - Patch std::string::subview for GCC 15 (Fedora 43)
 
 * Thu Sep 17 2026 Asher Buk <AshBuk@users.noreply.github.com> - 0.56.2-2

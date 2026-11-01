@@ -6,7 +6,7 @@
 # Version definitions (single source of truth)
 # =============================================================================
 %global hyprland_version        0.57.0
-%global hyprland_release        1
+%global hyprland_release        2
 # Commit of the release tag, reported by hyprctl version
 %global hyprland_commit         0aa6745f705f2c4b0a5004eb019ef76e5bbdb426
 %global hyprland_protocols_ver  0.8.0
@@ -252,6 +252,7 @@ VENDOR_PREFIX="$(pwd)/vendor"
 export PATH="$VENDOR_PREFIX/bin:$PATH"
 export PKG_CONFIG_PATH="$VENDOR_PREFIX/lib64/pkgconfig:$VENDOR_PREFIX/share/pkgconfig:$(pwd)/pkgconfig:%{_libdir}/pkgconfig:%{_datadir}/pkgconfig"
 export CMAKE_PREFIX_PATH="$VENDOR_PREFIX"
+VENDOR_RPATH='%{_libexecdir}/hyprland/vendor/lib64'
 
 # OpenGL/GLES3/EGL detection: CMake FindOpenGL needs explicit hints for libglvnd on Fedora
 # libglvnd provides libGLESv2.so (GLES2/3), libEGL.so, and libOpenGL.so
@@ -265,11 +266,13 @@ GL_FLAGS="-DOpenGL_GL_PREFERENCE=GLVND \
 
 # 1) hyprwayland-scanner (build tool) and hypr* libraries, in dependency order
 # (hyprwire: IPC library + scanner for hyprctl)
+# Vendored libs need their own RUNPATH: a binary's RUNPATH doesn't cover the deps of its libraries.
+# CMake writes it on install; build-time RPATH would break linking tools inside these projects.
 for dep in hyprwayland-scanner-%{hyprwayland_scanner_ver} hyprutils-%{hyprutils_ver} hyprlang-%{hyprlang_ver} \
            hyprcursor-%{hyprcursor_ver} hyprgraphics-%{hyprgraphics_ver} hyprwire-%{hyprwire_ver}; do
   pushd $dep
   cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$VENDOR_PREFIX" \
-    -DCMAKE_INSTALL_LIBDIR=lib64 -DBUILD_TESTING=OFF
+    -DCMAKE_INSTALL_LIBDIR=lib64 -DBUILD_TESTING=OFF -DCMAKE_INSTALL_RPATH="$VENDOR_RPATH"
   cmake --build build --parallel %{_smp_build_ncpus}
   cmake --install build
   popd
@@ -279,7 +282,7 @@ done
 for dep in aquamarine-%{aquamarine_ver} hyprtoolkit-%{hyprtoolkit_ver}; do
   pushd $dep
   cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$VENDOR_PREFIX" \
-    -DCMAKE_INSTALL_LIBDIR=lib64 -DBUILD_TESTING=OFF \
+    -DCMAKE_INSTALL_LIBDIR=lib64 -DBUILD_TESTING=OFF -DCMAKE_INSTALL_RPATH="$VENDOR_RPATH" \
     $GL_FLAGS
   cmake --build build --parallel %{_smp_build_ncpus}
   cmake --install build
@@ -325,7 +328,6 @@ export GIT_COMMIT_HASH="%{hyprland_commit}"
 export GIT_COMMIT_DATE="$(date -u -d "@${SOURCE_DATE_EPOCH:-$(date +%s)}" +%Y-%m-%d)"
 export GIT_DIRTY=""
 export GIT_COMMITS="0"
-VENDOR_RPATH='%{_libexecdir}/hyprland/vendor/lib64'
 cmake -B build \
   -DCMAKE_BUILD_TYPE=Release \
   -DCMAKE_INSTALL_PREFIX=%{_prefix} \
@@ -384,9 +386,10 @@ cp -a "$VENDOR_PREFIX"/lib64/lib*.so* "$VENDOR_DST/lib64/"
 DESTDIR=%{buildroot} cmake --install hyprlock-%{hyprlock_version}/build
 DESTDIR=%{buildroot} cmake --install hypridle-%{hypridle_version}/build
 
-# Without RUNPATH the binaries can't find the vendored libs
-for bin in Hyprland hyprctl start-hyprland hyprlock hypridle; do
-  readelf -d %{buildroot}%{_bindir}/$bin | grep -q 'RUNPATH.*/vendor/lib64' || { echo "$bin: no vendor RUNPATH"; exit 1; }
+# Without RUNPATH the binaries and vendored libs can't find the vendored libs they depend on
+for elf in %{buildroot}%{_bindir}/{Hyprland,hyprctl,start-hyprland,hyprlock,hypridle} "$VENDOR_DST"/lib64/lib*.so.*.*; do
+  readelf -d "$elf" | grep -q 'NEEDED.*lib\(aquamarine\|hypr\)' || continue
+  readelf -d "$elf" | grep -q 'RUNPATH.*/vendor/lib64' || { echo "$elf: no vendor RUNPATH"; exit 1; }
 done
 
 # Plugin development files, unusable without the vendored headers

@@ -120,9 +120,8 @@ export PATH="$VENDOR_PREFIX/bin:$PATH"
 export PKG_CONFIG_PATH="$VENDOR_PREFIX/lib64/pkgconfig:$VENDOR_PREFIX/lib/pkgconfig:$VENDOR_PREFIX/share/pkgconfig:$(pwd)/pkgconfig:%{_libdir}/pkgconfig:%{_datadir}/pkgconfig"
 export CMAKE_PREFIX_PATH="$VENDOR_PREFIX"
 
-# -fpermissive: GCC rejects the zero-length arrays in hyprwayland-scanner generated code.
-# optflags are repeated because -DCMAKE_CXX_FLAGS replaces the CXXFLAGS from the environment.
-PERMISSIVE_CXXFLAGS="%{optflags} -fpermissive"
+# optflags are repeated because -DCMAKE_CXX_FLAGS replaces the CXXFLAGS from the environment
+OPT_CXXFLAGS="%{optflags}"
 
 # 1) hyprwayland-scanner (build tool)
 pushd hyprwayland-scanner-%{hyprwayland_scanner_ver}
@@ -160,7 +159,7 @@ for dep in aquamarine-%{aquamarine_ver} hyprgraphics-%{hyprgraphics_ver} hyprtoo
   cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$VENDOR_PREFIX" \
     -DCMAKE_PREFIX_PATH="$VENDOR_PREFIX" -DCMAKE_INSTALL_LIBDIR=lib64 \
     -Dhyprwayland-scanner_DIR="$VENDOR_PREFIX/lib64/cmake/hyprwayland-scanner" \
-    -DCMAKE_CXX_FLAGS="$PERMISSIVE_CXXFLAGS" \
+    -DCMAKE_CXX_FLAGS="$OPT_CXXFLAGS" \
     -DOpenGL_GL_PREFERENCE=GLVND \
     -DOPENGL_opengl_LIBRARY=%{_libdir}/libOpenGL.so \
     -DOPENGL_gles3_LIBRARY=%{_libdir}/libGLESv2.so \
@@ -184,7 +183,7 @@ cmake -B build \
   -DCMAKE_INSTALL_PREFIX=%{_prefix} \
   -DCMAKE_PREFIX_PATH="$VENDOR_PREFIX" \
   -Dhyprwayland-scanner_DIR="$VENDOR_PREFIX/lib64/cmake/hyprwayland-scanner" \
-  -DCMAKE_CXX_FLAGS="$PERMISSIVE_CXXFLAGS" \
+  -DCMAKE_CXX_FLAGS="$OPT_CXXFLAGS" \
   -DCMAKE_EXE_LINKER_FLAGS="$LDFLAGS -Wl,-rpath-link,$VENDOR_PREFIX/lib64" \
   -DBUILD_TESTING=OFF \
   -DCMAKE_INSTALL_RPATH="$VENDOR_RPATH" \

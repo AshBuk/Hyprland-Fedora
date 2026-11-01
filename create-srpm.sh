@@ -67,6 +67,13 @@ validate_version "$SATELLITE_SPEC" "hyprtoolkit_ver"         "$HYPRTOOLKIT_VER"
 validate_version "$SATELLITE_SPEC" "hyprland_protocols_ver"  "$HYPRLAND_PROTOCOLS_VER"
 echo "  All versions consistent with hyprland-copr.spec"
 
+HYPRLAND_COMMIT=$(parse_spec_global "$HYPRLAND_SPEC" "hyprland_commit")
+TAG_COMMIT=$(git ls-remote https://github.com/hyprwm/Hyprland "refs/tags/v${HYPRLAND_VERSION}" "refs/tags/v${HYPRLAND_VERSION}^{}" | tail -1 | cut -f1)
+if [ "$HYPRLAND_COMMIT" != "$TAG_COMMIT" ]; then
+    echo "ERROR: hyprland_commit=$HYPRLAND_COMMIT, but v${HYPRLAND_VERSION} points to ${TAG_COMMIT:-nothing}"
+    exit 1
+fi
+
 # =============================================================================
 # Download helper
 # =============================================================================

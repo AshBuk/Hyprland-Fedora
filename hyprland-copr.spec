@@ -7,6 +7,8 @@
 # =============================================================================
 %global hyprland_version        0.57.0
 %global hyprland_release        1
+# Commit of the release tag, reported by hyprctl version
+%global hyprland_commit         0aa6745f705f2c4b0a5004eb019ef76e5bbdb426
 %global hyprland_protocols_ver  0.8.0
 %global hyprwayland_scanner_ver 0.4.6
 %global hyprutils_ver           0.14.3
@@ -33,7 +35,7 @@
 # don't advertise their sonames to the system, and don't require them from it.
 # ABI pairing is expressed with hyprland-vendor(<lib>) = <version> provides instead.
 %global __provides_exclude_from ^%{_libexecdir}/%{name}/vendor/.*$
-%global __requires_exclude ^(pkgconfig\\((aquamarine|hyprutils|hyprlang|hyprcursor|hyprgraphics|hyprwayland-scanner|hyprland-protocols|hyprwire|hyprtoolkit)\\)|lib(aquamarine|hypr[a-z]+)\\.so)
+%global __requires_exclude ^lib(aquamarine|hypr[a-z]+)\\.so
 
 Name:           hyprland
 Version:        %{hyprland_version}
@@ -62,7 +64,7 @@ Source27:       https://www.lua.org/ftp/lua-%{lua_ver}.tar.gz
 # hyprtoolkit: not used by Hyprland itself, shipped for xdg-desktop-portal-hyprland's picker
 Source28:       https://github.com/hyprwm/hyprtoolkit/archive/refs/tags/v%{hyprtoolkit_ver}.tar.gz#/hyprtoolkit-%{hyprtoolkit_ver}.tar.gz
 
-# glaze JSON library (for hyprpm, mock chroot has no network for FetchContent)
+# glaze JSON library (for start-hyprland, mock chroot has no network for FetchContent)
 # Using our release mirror to ensure availability
 Source30:       https://github.com/AshBuk/Hyprland-Fedora/releases/download/%{build_assets_release}/glaze-%{glaze_ver}.tar.gz
 
@@ -160,7 +162,7 @@ Recommends:     hypridle
 
 %description
 Hyprland is a dynamic tiling Wayland compositor with modern Wayland features,
-high customizability, IPC, plugins, and visual effects.
+high customizability, IPC and visual effects.
 
 This is a COPR build for Fedora, with hyprlock and hypridle as subpackages.
 Pinned Hyprland dependencies are built from fixed-version sources and installed
@@ -220,7 +222,7 @@ tar -xzf %{SOURCE26}
 tar -xzf %{SOURCE27}
 tar -xzf %{SOURCE28}
 
-# Unpack glaze (for hyprpm, mock chroot has no network for FetchContent)
+# Unpack glaze (for start-hyprland, mock chroot has no network for FetchContent)
 tar -xzf %{SOURCE30}
 
 # Unpack subpackage sources
@@ -245,9 +247,8 @@ export PATH="$VENDOR_PREFIX/bin:$PATH"
 export PKG_CONFIG_PATH="$VENDOR_PREFIX/lib64/pkgconfig:$VENDOR_PREFIX/lib/pkgconfig:$VENDOR_PREFIX/share/pkgconfig:$(pwd)/pkgconfig:%{_libdir}/pkgconfig:%{_datadir}/pkgconfig"
 export CMAKE_PREFIX_PATH="$VENDOR_PREFIX"
 
-# -fpermissive: GCC rejects the zero-length arrays in hyprwayland-scanner generated code.
-# optflags are repeated because -DCMAKE_CXX_FLAGS replaces the CXXFLAGS from the environment.
-PERMISSIVE_CXXFLAGS="%{optflags} -fpermissive"
+# optflags are repeated because -DCMAKE_CXX_FLAGS replaces the CXXFLAGS from the environment
+OPT_CXXFLAGS="%{optflags}"
 
 # OpenGL/GLES3/EGL detection: CMake FindOpenGL needs explicit hints for libglvnd on Fedora
 # libglvnd provides libGLESv2.so (GLES2/3), libEGL.so, and libOpenGL.so
@@ -304,7 +305,7 @@ pushd aquamarine-%{aquamarine_ver}
 cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$VENDOR_PREFIX" \
   -DCMAKE_PREFIX_PATH="$VENDOR_PREFIX" -DCMAKE_INSTALL_LIBDIR=lib64 \
   -Dhyprwayland-scanner_DIR="$VENDOR_PREFIX/lib64/cmake/hyprwayland-scanner" \
-  -DCMAKE_CXX_FLAGS="$PERMISSIVE_CXXFLAGS" \
+  -DCMAKE_CXX_FLAGS="$OPT_CXXFLAGS" \
   $GL_FLAGS
 cmake --build build --parallel %{_smp_build_ncpus}
 cmake --install build
@@ -350,7 +351,7 @@ pushd hyprtoolkit-%{hyprtoolkit_ver}
 cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$VENDOR_PREFIX" \
   -DCMAKE_PREFIX_PATH="$VENDOR_PREFIX" -DCMAKE_INSTALL_LIBDIR=lib64 \
   -Dhyprwayland-scanner_DIR="$VENDOR_PREFIX/lib64/cmake/hyprwayland-scanner" \
-  -DCMAKE_CXX_FLAGS="$PERMISSIVE_CXXFLAGS" \
+  -DCMAKE_CXX_FLAGS="$OPT_CXXFLAGS" \
   $GL_FLAGS
 cmake --build build --parallel %{_smp_build_ncpus}
 cmake --install build
@@ -358,12 +359,13 @@ popd
 
 # 12) Hyprland, including start-hyprland (add_subdirectory)
 # BUILD_TESTING off: hyprtester's plugin Makefile doesn't support vendored deps
+# NO_HYPRPM: plugin builds need the vendored headers and .pc files, which aren't shipped
 # RPATH set at build time: patchelf corrupts the ELF program headers
 # Add vendor include path for glaze headers (start-hyprland uses direct #include, not find_package)
 # Hyprland CMakeLists reads these env vars and falls back to "unknown" otherwise (tarball has no .git)
 export GIT_TAG="v%{hyprland_version}"
 export GIT_BRANCH="main"
-export GIT_COMMIT_HASH="release-v%{hyprland_version}"
+export GIT_COMMIT_HASH="%{hyprland_commit}"
 export GIT_COMMIT_MESSAGE="Release v%{hyprland_version}"
 export GIT_COMMIT_DATE="$(date -u -d "@${SOURCE_DATE_EPOCH:-$(date +%s)}" +%Y-%m-%d)"
 export GIT_DIRTY=""
@@ -374,8 +376,9 @@ cmake -B build \
   -DCMAKE_INSTALL_PREFIX=%{_prefix} \
   -DCMAKE_PREFIX_PATH="$VENDOR_PREFIX" \
   -Dhyprwayland-scanner_DIR="$VENDOR_PREFIX/lib64/cmake/hyprwayland-scanner" \
-  -DCMAKE_CXX_FLAGS="$PERMISSIVE_CXXFLAGS -I$VENDOR_PREFIX/include" \
+  -DCMAKE_CXX_FLAGS="$OPT_CXXFLAGS -I$VENDOR_PREFIX/include" \
   -DBUILD_TESTING=OFF \
+  -DNO_HYPRPM=ON \
   -DCMAKE_INSTALL_RPATH="$VENDOR_RPATH" \
   -DCMAKE_BUILD_WITH_INSTALL_RPATH=ON \
   $GL_FLAGS
@@ -389,7 +392,7 @@ cmake -B build \
   -DCMAKE_INSTALL_PREFIX=%{_prefix} \
   -DCMAKE_PREFIX_PATH="$VENDOR_PREFIX" \
   -Dhyprwayland-scanner_DIR="$VENDOR_PREFIX/lib64/cmake/hyprwayland-scanner" \
-  -DCMAKE_CXX_FLAGS="$PERMISSIVE_CXXFLAGS" \
+  -DCMAKE_CXX_FLAGS="$OPT_CXXFLAGS" \
   -DCMAKE_INSTALL_RPATH="$SUBPKG_RPATH" \
   -DCMAKE_BUILD_WITH_INSTALL_RPATH=ON \
   $GL_FLAGS
@@ -403,7 +406,7 @@ cmake -B build \
   -DCMAKE_INSTALL_PREFIX=%{_prefix} \
   -DCMAKE_PREFIX_PATH="$VENDOR_PREFIX" \
   -Dhyprwayland-scanner_DIR="$VENDOR_PREFIX/lib64/cmake/hyprwayland-scanner" \
-  -DCMAKE_CXX_FLAGS="$PERMISSIVE_CXXFLAGS" \
+  -DCMAKE_CXX_FLAGS="$OPT_CXXFLAGS" \
   -DCMAKE_INSTALL_RPATH="$SUBPKG_RPATH" \
   -DCMAKE_BUILD_WITH_INSTALL_RPATH=ON
 cmake --build build --parallel %{_smp_build_ncpus}
@@ -438,10 +441,13 @@ DESTDIR=%{buildroot} cmake --install hypridle-%{hypridle_version}/build
 
 # Log RPATH of installed binaries
 echo "Verifying RPATH on installed binaries:"
-for bin in %{buildroot}%{_bindir}/Hyprland %{buildroot}%{_bindir}/hyprctl %{buildroot}%{_bindir}/hyprpm %{buildroot}%{_bindir}/start-hyprland %{buildroot}%{_bindir}/hyprlock %{buildroot}%{_bindir}/hypridle; do
+for bin in %{buildroot}%{_bindir}/Hyprland %{buildroot}%{_bindir}/hyprctl %{buildroot}%{_bindir}/start-hyprland %{buildroot}%{_bindir}/hyprlock %{buildroot}%{_bindir}/hypridle; do
   [ -x "$bin" ] || continue
   echo "  $(basename $bin): $(readelf -d "$bin" 2>/dev/null | grep -E 'RPATH|RUNPATH' || echo 'no RPATH set')"
 done
+
+# Plugin development files, unusable without the vendored headers
+rm -rf %{buildroot}%{_includedir}/hyprland %{buildroot}%{_datadir}/pkgconfig/hyprland.pc
 
 # Remove glaze files (header-only library, not needed at runtime)
 rm -rf %{buildroot}%{_includedir}/glaze
@@ -454,7 +460,6 @@ rm -rf %{buildroot}%{_datadir}/glaze
 %{_bindir}/Hyprland
 %{_bindir}/hyprland
 %{_bindir}/hyprctl
-%{_bindir}/hyprpm
 # start-hyprland watchdog binary
 %{_bindir}/start-hyprland
 # Vendored libraries
@@ -470,17 +475,9 @@ rm -rf %{buildroot}%{_datadir}/glaze
 %exclude %{_datadir}/hypr/hyprlock.conf
 %exclude %{_datadir}/hypr/hypridle.conf
 %{_datadir}/xdg-desktop-portal/hyprland-portals.conf
-# Development headers
-%{_includedir}/hyprland/
-# pkg-config
-%{_datadir}/pkgconfig/hyprland.pc
 # Man pages
 %{_mandir}/man1/Hyprland.1*
 %{_mandir}/man1/hyprctl.1*
-# Shell completions
-%{_datadir}/bash-completion/completions/hyprpm
-%{_datadir}/fish/vendor_completions.d/hyprpm.fish
-%{_datadir}/zsh/site-functions/_hyprpm
 
 %files -n hyprlock
 %license hyprlock-%{hyprlock_version}/LICENSE
@@ -504,6 +501,8 @@ rm -rf %{buildroot}%{_datadir}/glaze
 - Rely on automatic library Requires, drop unused build deps
 - Stop exporting vendored sonames, provide hyprland-vendor() instead
 - Tie hyprlock/hypridle Release to the hyprland build they link against
+- Drop hyprpm and plugin headers: plugins can't be built against vendored libs
+- Report the real tag commit in hyprctl version, build without -fpermissive
 - Patch std::string::subview for GCC 15 (Fedora 43)
 
 * Thu Sep 17 2026 Asher Buk <AshBuk@users.noreply.github.com> - 0.56.2-2

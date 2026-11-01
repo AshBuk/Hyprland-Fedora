@@ -51,7 +51,7 @@ sudo dnf copr disable ashbuk/Hyprland-Fedora
 
 | Package | Description |
 |---------|-------------|
-| `hyprland` | Dynamic tiling Wayland compositor (`Hyprland`, `hyprctl`, `hyprpm`, `start-hyprland`) |
+| `hyprland` | Dynamic tiling Wayland compositor (`Hyprland`, `hyprctl`, `start-hyprland`) |
 | `hyprlock` | Screen lock utility (subpackage, installed with hyprland) |
 | `hypridle` | Idle daemon for lock/sleep on inactivity (subpackage, installed with hyprland) |
 | `xdg-desktop-portal-hyprland` | Portal backend for screen sharing, file dialogs |

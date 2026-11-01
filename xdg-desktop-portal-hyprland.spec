@@ -15,6 +15,10 @@
 %global hyprgraphics_ver        0.5.1
 %global hyprtoolkit_ver         0.6.0
 
+# Vendored libs live in hyprland's private prefix and aren't advertised as sonames;
+# the ABI pairing is required through hyprland-vendor() provides below.
+%global __requires_exclude ^lib(aquamarine|hypr[a-z]+)\\.so
+
 Name:           xdg-desktop-portal-hyprland
 Version:        %{portal_version}
 Release:        1%{?dist}
@@ -73,6 +77,9 @@ BuildRequires:  systemd-devel
 
 # Runtime deps
 Requires:       hyprland >= %{hyprland_min_ver}
+Requires:       hyprland-vendor(hyprlang) = %{hyprlang_ver}
+Requires:       hyprland-vendor(hyprtoolkit) = %{hyprtoolkit_ver}
+Requires:       hyprland-vendor(hyprutils) = %{hyprutils_ver}
 Requires:       xdg-desktop-portal
 Requires:       pipewire >= 1.1.82
 
@@ -212,7 +219,7 @@ done
 - Update to xdg-desktop-portal-hyprland 1.5.0 (workspace sharing)
 - Share picker now uses hyprtoolkit instead of Qt6
 - Bump hyprutils 0.14.2 -> 0.14.3, hyprland-protocols 0.7.0 -> 0.8.0
-- Require hyprland >= 0.57.0
+- Require hyprland >= 0.57.0 and matching hyprland-vendor() libs
 
 * Thu Sep 17 2026 Asher Buk <AshBuk@users.noreply.github.com> - 1.4.1-2
 - Bump hyprutils 0.14.0 -> 0.14.2

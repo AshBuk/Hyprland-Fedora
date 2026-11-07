@@ -5,17 +5,17 @@
 # =============================================================================
 # Version definitions (single source of truth)
 # =============================================================================
-%global hyprland_version        0.57.0
-%global hyprland_release        2
+%global hyprland_version        0.57.1
+%global hyprland_release        1
 # Commit of the release tag, reported by hyprctl version
-%global hyprland_commit         0aa6745f705f2c4b0a5004eb019ef76e5bbdb426
+%global hyprland_commit         acc1aa0bfd4bd575dcb0f76c35ccf12b660a1ab9
 %global hyprland_protocols_ver  0.8.0
 %global hyprwayland_scanner_ver 0.4.6
 %global hyprutils_ver           0.14.3
 %global hyprlang_ver            0.6.8
 %global hyprcursor_ver          0.1.13
-%global hyprgraphics_ver        0.5.1
-%global aquamarine_ver          0.15.1
+%global hyprgraphics_ver        0.6.0
+%global aquamarine_ver          0.16.0
 %global hyprwire_ver            0.3.1
 %global glaze_ver               7.2.0
 %global hyprtoolkit_ver         0.6.0
@@ -23,8 +23,8 @@
 %global lua_ver                 5.5.1
 # Subpackage versions. Their Release embeds the hyprland build they link against,
 # so every hyprland rebuild also ships rebuilt hyprlock/hypridle.
-%global hyprlock_version        0.9.6
-%global hyprlock_release        2
+%global hyprlock_version        0.9.7
+%global hyprlock_release        1
 %global hypridle_version        0.1.8
 %global hypridle_release        2
 
@@ -434,6 +434,10 @@ rm -rf %{buildroot}%{_includedir}/hyprland %{buildroot}%{_datadir}/pkgconfig/hyp
 %{_datadir}/hypr/hypridle.conf
 
 %changelog
+* Sat Nov 07 2026 Asher Buk <AshBuk@users.noreply.github.com> - 0.57.1-1
+- Update to Hyprland 0.57.1 (patch release)
+- Bump aquamarine 0.15.1 -> 0.16.0, hyprgraphics 0.5.1 -> 0.6.0, hyprlock 0.9.6 -> 0.9.7
+
 * Sun Nov 01 2026 Asher Buk <AshBuk@users.noreply.github.com> - 0.57.0-1
 - Update to Hyprland 0.57.0
 - Bump hyprutils 0.14.2 -> 0.14.3, hyprland-protocols 0.7.0 -> 0.8.0, Lua 5.5.0 -> 5.5.1

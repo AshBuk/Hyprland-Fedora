@@ -11,8 +11,8 @@
 %global hyprutils_ver           0.14.3
 %global hyprlang_ver            0.6.8
 %global hyprland_protocols_ver  0.8.0
-%global aquamarine_ver          0.15.1
-%global hyprgraphics_ver        0.5.1
+%global aquamarine_ver          0.16.0
+%global hyprgraphics_ver        0.6.0
 %global hyprtoolkit_ver         0.6.0
 
 # Vendored libs live in hyprland's private prefix and aren't advertised as sonames;
@@ -21,7 +21,7 @@
 
 Name:           xdg-desktop-portal-hyprland
 Version:        %{portal_version}
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        XDG Desktop Portal backend for Hyprland
 License:        BSD-3-Clause
 URL:            https://github.com/hyprwm/xdg-desktop-portal-hyprland
@@ -191,6 +191,9 @@ done
 %{_userunitdir}/xdg-desktop-portal-hyprland.service
 
 %changelog
+* Sat Nov 07 2026 Asher Buk <AshBuk@users.noreply.github.com> - 1.5.0-2
+- Rebuild against aquamarine 0.16.0, hyprgraphics 0.6.0
+
 * Sun Nov 01 2026 Asher Buk <AshBuk@users.noreply.github.com> - 1.5.0-1
 - Update to xdg-desktop-portal-hyprland 1.5.0
 - Bump hyprutils 0.14.2 -> 0.14.3, hyprland-protocols 0.7.0 -> 0.8.0

@@ -24,7 +24,7 @@ jobs:
     name: rpmlint
     runs-on: ubuntu-latest
     container:
-      image: fedora:43
+      image: fedora:45
 
     steps:
       - name: Checkout

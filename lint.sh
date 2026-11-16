@@ -9,7 +9,7 @@ set -e
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 echo "=== Running rpmlint on all spec files ==="
-docker run --rm -e LANG=en_US.UTF-8 -v "${SCRIPT_DIR}:/work:ro" fedora:43 \
+docker run --rm -e LANG=en_US.UTF-8 -v "${SCRIPT_DIR}:/work:ro" fedora:45 \
   sh -c "dnf install -y -q rpmlint glibc-langpack-en 2>/dev/null && rpmlint /work/*.spec"
 
 echo ""

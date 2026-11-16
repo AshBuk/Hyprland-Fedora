@@ -5,15 +5,15 @@
 # =============================================================================
 # Version definitions (single source of truth)
 # =============================================================================
-%global hyprland_version        0.57.1
+%global hyprland_version        0.57.2
 %global hyprland_release        1
 # Commit of the release tag, reported by hyprctl version
-%global hyprland_commit         acc1aa0bfd4bd575dcb0f76c35ccf12b660a1ab9
+%global hyprland_commit         11cbc6c577b84ffb1edf4df3fc5b6128c3ae6947
 %global hyprland_protocols_ver  0.8.0
 %global hyprwayland_scanner_ver 0.4.6
 %global hyprutils_ver           0.14.3
 %global hyprlang_ver            0.6.8
-%global hyprcursor_ver          0.1.13
+%global hyprcursor_ver          0.1.14
 %global hyprgraphics_ver        0.6.0
 %global aquamarine_ver          0.16.0
 %global hyprwire_ver            0.3.1
@@ -28,7 +28,7 @@
 %global hypridle_version        0.1.8
 %global hypridle_release        2
 
-# Release on our GitHub mirror hosting udis86, glaze and the GCC 15 patch
+# Release on our GitHub mirror hosting udis86 and glaze
 %global build_assets_release    v0.54-fedora
 
 # Vendored Hyprland libraries are private (/usr/libexec/hyprland/vendor/, reached via RUNPATH):
@@ -70,13 +70,6 @@ Source30:       https://github.com/AshBuk/Hyprland-Fedora/releases/download/%{bu
 # Subpackage sources
 Source40:       https://github.com/hyprwm/hyprlock/archive/refs/tags/v%{hyprlock_version}.tar.gz#/hyprlock-%{hyprlock_version}.tar.gz
 Source41:       https://github.com/hyprwm/hypridle/archive/refs/tags/v%{hypridle_version}.tar.gz#/hypridle-%{hypridle_version}.tar.gz
-
-# Downstream compatibility patches (hosted in our release mirror)
-# Fedora 43 (GCC 15) lacks std::ranges::starts_with and std::string::subview
-# (libstdc++ ships them from GCC 16). Drop once Fedora 43 reaches EOL.
-# gcc15_patch_ver: Hyprland version the patch was cut against.
-%global gcc15_patch_ver 0.57.0
-Patch0:         https://github.com/AshBuk/Hyprland-Fedora/releases/download/%{build_assets_release}/hyprland-%{gcc15_patch_ver}-gcc15.patch
 
 # Build dependencies
 BuildRequires:  cmake
@@ -134,7 +127,7 @@ BuildRequires:  libcanberra-devel
 # iniparser, abseil for hyprtoolkit
 BuildRequires:  iniparser-devel
 BuildRequires:  abseil-cpp-devel
-# Subpackage deps (hyprlock: PAM auth); D-Bus IPC for hyprlock, hypridle and Hyprland rtkit
+# Subpackage deps (hyprlock: PAM auth); D-Bus IPC for hyprlock and hypridle
 BuildRequires:  pam-devel
 BuildRequires:  sdbus-cpp-devel >= 2.0.0
 
@@ -142,8 +135,6 @@ BuildRequires:  sdbus-cpp-devel >= 2.0.0
 # hwdata: PNP/PCI ID databases read by aquamarine; Xwayland: spawned for X11 clients
 Requires:       hwdata
 Requires:       xorg-x11-server-Xwayland
-# rtkit grants Hyprland realtime scheduling over D-Bus
-Recommends:     rtkit
 # Vendored library versions, for packages linked against them via RUNPATH
 Provides:       hyprland-vendor(aquamarine) = %{aquamarine_ver}
 Provides:       hyprland-vendor(hyprcursor) = %{hyprcursor_ver}
@@ -198,11 +189,7 @@ actions on inactivity timeouts, such as locking the screen, turning off
 the display, or suspending the system.
 
 %prep
-# -N: Patch0 is applied only on Fedora <= 43 (GCC 15)
-%autosetup -N -n Hyprland-%{hyprland_version}
-%if 0%{?fedora} <= 43
-%patch -P 0 -p1
-%endif
+%autosetup -n Hyprland-%{hyprland_version}
 
 # udis86 submodule (not in the GitHub tarball)
 rm -rf subprojects/udis86
@@ -434,6 +421,11 @@ rm -rf %{buildroot}%{_includedir}/hyprland %{buildroot}%{_datadir}/pkgconfig/hyp
 %{_datadir}/hypr/hypridle.conf
 
 %changelog
+* Mon Nov 16 2026 Asher Buk <AshBuk@users.noreply.github.com> - 0.57.2-1
+- Update to Hyprland 0.57.2 (patch release, drops rtkit)
+- Bump hyprcursor 0.1.13 -> 0.1.14
+- Drop GCC 15 patch with Fedora 43 support
+
 * Sat Nov 07 2026 Asher Buk <AshBuk@users.noreply.github.com> - 0.57.1-1
 - Update to Hyprland 0.57.1 (patch release)
 - Bump aquamarine 0.15.1 -> 0.16.0, hyprgraphics 0.5.1 -> 0.6.0, hyprlock 0.9.6 -> 0.9.7
